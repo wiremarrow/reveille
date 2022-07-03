@@ -45,6 +45,10 @@ async def is_registered(ctx, duid):
 
 # Checks DB if user is_verif = 1 by val comparison from discord_user_id (duid)
 async def is_verified(ctx, duid):
+    is_reg = await is_registered(ctx, duid)
+    if (not is_reg):
+        return False
+
     try:
         db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
         cur = db.cursor()
@@ -80,14 +84,14 @@ async def help(ctx):
 async def register(ctx, net_id):
     discord_user_id = ctx.message.author.id
 
-    is_registered = is_registered(ctx, discord_user_id)
-    if (is_registered == 404):
+    is_reg = await is_registered(ctx, discord_user_id)
+    if (is_reg == 404):
         return
 
-    is_verified = is_verified(ctx, discord_user_id)
-    if (is_verified == 404):
+    is_ver = await is_verified(ctx, discord_user_id)
+    if (is_ver == 404):
         return
-    elif (is_verified):
+    elif (is_ver):
         await ctx.send('You can\'t register if you are already verified.')
         return
 
@@ -104,7 +108,7 @@ async def register(ctx, net_id):
         verif_code = random.randint(100000, 999999)
         
         # Updates user DB records w/ new verif_code and net_id if is_registered, adds new user record to DB if not
-        if (is_registered):
+        if (is_reg):
             try:
                 db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
                 cur = db.cursor()
@@ -135,7 +139,7 @@ async def register(ctx, net_id):
             msg = f'Subject: {subject}\n\n{body}'
 
             smtp.sendmail(sender_email, receiver_email, msg)
-            if (is_registered):
+            if (is_reg):
                 await ctx.send(f'You\'ve already a registered user in the database. An email with a new verification code has been sent to your TAMU email address ({net_id}@tamu.edu). To confirm your registration and verify, please DM me, Reveille, your verification code in the form of the command `{PREFIX}verify <verif_code>`.\n\nMake sure to check your spam if you\'re having trouble!')
             else:
                 await ctx.send(f'An email with a verification code has been sent to your TAMU email address ({net_id}@tamu.edu). To confirm your registration and verify, please DM me, Reveille, your verification code in the form of the command `{PREFIX}verify <verif_code>`.\n\nMake sure to check your spam if you\'re having trouble!')
@@ -148,18 +152,34 @@ async def register(ctx, net_id):
 async def verify(ctx, verif_code):
     discord_user_id = ctx.message.author.id
 
-    is_registered = is_registered(ctx, discord_user_id)
-    if (is_registered == 404):
+    is_reg = await is_registered(ctx, discord_user_id)
+    if (is_reg == 404):
         return
-    elif (not is_registered):
-        await ctx.send('You can\'t verify if you are not registered')
+    elif (not is_reg):
+        await ctx.send('You can\'t verify if you are not registered.')
         return
 
-    is_verified = is_verified(ctx, discord_user_id)
-    if (is_verified == 404):
+    is_ver = await is_verified(ctx, discord_user_id)
+    if (is_ver == 404):
         return
-    elif (is_verified):
+    elif (is_ver):
         await ctx.send('You can\'t verify if you are already verified.')
+        return
+    
+    try:
+        db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
+        cur = db.cursor()
+        cur.execute('SELECT verif_code '
+                    f'FROM {USER_TBL_NAME} '
+                    f'WHERE discord_user_id = {discord_user_id}')
+            
+        true_verif_code = int(cur.fetchone()[0])
+
+        if (true_verif_code != int(verif_code)):
+            await ctx.send('Incorrect verification code. Ensure you\'re using proper command syntax and your typed code matches the emailed code.')
+            return
+    except Exception as e:
+        await ctx.send(f'Something went wrong while checking user verification code. {e}')
         return
     
     try:
