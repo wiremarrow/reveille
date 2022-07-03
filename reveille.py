@@ -72,9 +72,10 @@ bot = commands.Bot(command_prefix=PREFIX, help_command=None)
 @bot.command()
 async def help(ctx):
     title = '**Command Help Menu**'
-    description = (f'`{PREFIX}help` - Produces this menu for command help.\n'
+    description = (f'`{PREFIX}help` - Produces this menu for command syntax and descriptions.\n'
                    f'`{PREFIX}register <net_id>` - Register your NetID with the bot to verify yourself.\n'
-                   f'`{PREFIX}verify <verif_code>` - Verifies user if correct verification code is passed.')
+                   f'`{PREFIX}verify <verif_code>` - Verifies user if correct verification code is passed.\n'
+                   f'`{PREFIX}is_verified <@user>` - Checks if a user has verified their NetID.')
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
@@ -201,5 +202,16 @@ async def verify(ctx, verif_code):
     
     await ctx.send('You\'ve successfully verified! You now have full server/bot functionality.')
     return
+
+# Checks is a user is verified in DB
+@bot.command(name='is_verified')
+async def is_user_verified(ctx, member : discord.Member):
+    is_ver = await is_verified(ctx, member.id)
+    if (is_ver == 404):
+        return
+    elif (is_ver):
+        await ctx.send(f'{member.mention} is verified.')
+    else:
+        await ctx.send(f'{member.mention} is not verified.')
 
 bot.run(TOKEN)
