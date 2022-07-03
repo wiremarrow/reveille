@@ -5,7 +5,6 @@ import random
 import smtplib
 import mysql.connector
 
-
 # Initialize config/secret vars
 c = open('config.json')
 s = open('secret.json')
@@ -25,6 +24,43 @@ SQL_PASS = secret['SQL_PASS']
 DB_NAME = config['SQL_DB_NAME']
 USER_TBL_NAME = config['SQL_USER_TBL_NAME']
 
+# Checks DB for registration w/ discord_user_id val lookup from discord_user_id (duid)
+async def is_registered(ctx, duid):
+    try:
+        db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
+        cur = db.cursor()
+        cur.execute('SELECT COUNT(1) '
+                    f'FROM {USER_TBL_NAME} '
+                    f'WHERE discord_user_id = {duid}')
+            
+        match_num = int(cur.fetchone()[0])
+
+        if match_num != 0:
+            return True
+        else:
+            return False
+    except Exception as e:
+        await ctx.send(f'Something went wrong while checking for user registration. {e}')
+        return 404
+
+# Checks DB if user is_verif = 1 by val comparison from discord_user_id (duid)
+async def is_verified(ctx, duid):
+    try:
+        db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
+        cur = db.cursor()
+        cur.execute('SELECT is_verif '
+                    f'FROM {USER_TBL_NAME} '
+                    f'WHERE discord_user_id = {duid}')
+            
+        val = int(cur.fetchone()[0])
+
+        if val == 0:
+            return False
+        elif val == 1:
+            return True
+    except Exception as e:
+        await ctx.send(f'Something went wrong while checking for user verification. {e}')
+        return 404
 
 bot = commands.Bot(command_prefix=PREFIX, help_command=None)
 
@@ -39,13 +75,22 @@ async def help(ctx):
     embed = discord.Embed(title=title, description=description, color=color)
     await ctx.send(embed=embed)
 
-# Needs a check  if already verified
-
-
-
 # Initiates registration process w/ email verification (paired w/ verify command for verif completion)
 @bot.command()
 async def register(ctx, net_id):
+    discord_user_id = ctx.message.author.id
+
+    is_registered = is_registered(ctx, discord_user_id)
+    if (is_registered == 404):
+        return
+
+    is_verified = is_verified(ctx, discord_user_id)
+    if (is_verified == 404):
+        return
+    elif (is_verified):
+        await ctx.send('You can\'t register if you are already verified.')
+        return
+
     domain = 'smtp.gmail.com'
     port = 587
     with smtplib.SMTP(domain, port) as smtp:
@@ -57,25 +102,6 @@ async def register(ctx, net_id):
         sender_email = EMAIL
         receiver_email = f'{net_id}@tamu.edu'
         verif_code = random.randint(100000, 999999)
-        discord_user_id = ctx.message.author.id
-
-        # Checks for past registration w/ DB discord_user_id val lookup - flags if non-zero matches found
-        is_registered = False
-
-        try:
-            db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
-            cur = db.cursor()
-            cur.execute('SELECT COUNT(1) '
-                        f'FROM {USER_TBL_NAME} '
-                        f'WHERE discord_user_id = {discord_user_id}')
-            
-            match_num = int(cur.fetchone()[0])
-
-            if match_num != 0:
-                is_registered = True
-        except Exception as e:
-            await ctx.send(f'Something went wrong while checking for past user registration. {e}')
-            return
         
         # Updates user DB records w/ new verif_code and net_id if is_registered, adds new user record to DB if not
         if (is_registered):
@@ -120,7 +146,35 @@ async def register(ctx, net_id):
 # Verifies users w/ DB verif_code val lookup comparison, updates is_verif val to 1 if code match
 @bot.command()
 async def verify(ctx, verif_code):
-    # to do
-    await ctx.send('You\'re successfully verified! You now have full server/bot functionality.')
+    discord_user_id = ctx.message.author.id
+
+    is_registered = is_registered(ctx, discord_user_id)
+    if (is_registered == 404):
+        return
+    elif (not is_registered):
+        await ctx.send('You can\'t verify if you are not registered')
+        return
+
+    is_verified = is_verified(ctx, discord_user_id)
+    if (is_verified == 404):
+        return
+    elif (is_verified):
+        await ctx.send('You can\'t verify if you are already verified.')
+        return
+    
+    try:
+        db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
+        cur = db.cursor()
+        cur.execute(f'UPDATE {USER_TBL_NAME} '
+                    f'SET is_verif = 1 '
+                    f'WHERE discord_user_id = {discord_user_id}')
+
+        db.commit()
+    except Exception as e:
+        await ctx.send(f'Something went wrong while verifying user. {e}')
+        return
+    
+    await ctx.send('You\'ve successfully verified! You now have full server/bot functionality.')
+    return
 
 bot.run(TOKEN)
