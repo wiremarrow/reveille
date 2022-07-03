@@ -24,7 +24,7 @@ SQL_PASS = secret['SQL_PASS']
 DB_NAME = config['SQL_DB_NAME']
 USER_TBL_NAME = config['SQL_USER_TBL_NAME']
 
-# Checks DB for registration w/ discord_user_id val lookup from discord_user_id (duid)
+# Checks DB for registration val lookup from discord_user_id (duid)
 async def is_registered(ctx, duid):
     try:
         db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
@@ -73,7 +73,8 @@ bot = commands.Bot(command_prefix=PREFIX, help_command=None)
 async def help(ctx):
     title = '**Command Help Menu**'
     description = (f'`{PREFIX}help` - Produces this menu for command help.\n'
-                   f'`{PREFIX}register <net_id>` - Register your NetID with the bot to verify yourself.')
+                   f'`{PREFIX}register <net_id>` - Register your NetID with the bot to verify yourself.\n'
+                   f'`{PREFIX}verify <verif_code>` - Verifies user if correct verification code is passed.')
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
@@ -84,6 +85,7 @@ async def help(ctx):
 async def register(ctx, net_id):
     discord_user_id = ctx.message.author.id
 
+    # Criteria restriction filter
     is_reg = await is_registered(ctx, discord_user_id)
     if (is_reg == 404):
         return
@@ -152,6 +154,7 @@ async def register(ctx, net_id):
 async def verify(ctx, verif_code):
     discord_user_id = ctx.message.author.id
 
+    # Criteria restriction filter
     is_reg = await is_registered(ctx, discord_user_id)
     if (is_reg == 404):
         return
@@ -166,6 +169,7 @@ async def verify(ctx, verif_code):
         await ctx.send('You can\'t verify if you are already verified.')
         return
     
+    # Checks if true verif code = given verif code, terminates if not
     try:
         db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
         cur = db.cursor()
@@ -182,6 +186,7 @@ async def verify(ctx, verif_code):
         await ctx.send(f'Something went wrong while checking user verification code. {e}')
         return
     
+    # Updates user is_verif to 1 in DB
     try:
         db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
         cur = db.cursor()
