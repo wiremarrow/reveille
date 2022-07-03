@@ -1,4 +1,6 @@
 {
     "BOT_COMMAND_PREFIX": ".",
-    "BOT_EMAIL": "reveille.bot@gmail.com"
+    "BOT_EMAIL": "reveille.bot@gmail.com",
+    "SQL_USER": "root",
+    "SQL_DB_NAME": "reveille"
 }
