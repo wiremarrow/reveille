@@ -222,50 +222,45 @@ async def is_user_verified(ctx, member : discord.Member):
 
 # Displays info embed for specified course using TAMU catalog search
 @bot.command()
-async def course(ctx, subject, num):
-    search_url = f'https://catalog.tamu.edu/search/?search={subject}+{num}'
+async def course(ctx, subject_code, course_num):
+    SUBJECT_NAME = subjects[f'{subject_code.upper()}']
+
+    search_url = f'https://catalog.tamu.edu/search/?search={subject_code.upper()}+{course_num}'
     html = requests.get(search_url).content
     soup = BeautifulSoup(html, 'html.parser')
 
     course_html = soup.find(class_='searchresult search-courseresult')
 
-    name = course_html.find('h2').text
-    credit = course_html.find(class_='hours noindent').text
-    desc = course_html.find(class_='courseblockdesc').text
+    course_name = course_html.find('h2').text
+    course_hrs = course_html.find(class_='hours noindent').text.strip()
+    course_desc = course_html.find(class_='courseblockdesc').text.strip()
 
-    credit_parts = [x for x in credit.split('\n') if x != '']
-    print(credit_parts)
-    credit_num = f'{" ".join(credit_parts[0].split(" ")[1:]).split(".")[0]} {credit_parts[0].split(" ")[0].lower()}'
-    hours_extra = '\n'.join(credit_parts[1:])
+    hours_parts = [x.strip() for x in course_hrs.split('\n') if x != '']
+    course_cred = f'{" ".join(hours_parts[0].split(" ")[1:]).split(".")[0]} {hours_parts[0].split(" ")[0].lower()}'
+    course_hrs_info = '\n'.join(hours_parts[1:])
 
-    prereq_act = False
+    has_prereq = False
 
-    prereq = re.search(r'Prerequisite(s)?: ([^.]+).', desc)
+    prereq = re.search(r'Prerequisite(s)?: ([^.]+).', course_desc)
     if prereq != None:
-        prereq_act = True
-        prereq = prereq.group()
-        desc = desc.replace(prereq, '')
-        prereq = f'**{prereq.split(" ")[0]}** {" ".join(prereq.split(" ")[1:])}'
-        desc = f'{desc}\n{prereq}'
+        has_prereq = True
+        prereq_str = prereq.group().strip()
+        prereq_sentence = f'**{prereq_str.split(" ")[0]}** {" ".join(prereq_str.split(" ")[1:])}'
+        course_desc = f'{course_desc.replace(prereq_str, "")}\n\n{prereq_sentence}'
     
-    cross_list = re.search(r'Cross Listing(s)?: ([^.]+).', desc)
-    if cross_list != None:
-        cross_list = cross_list.group()
-        desc = desc.replace(cross_list, '')
-        print(cross_list.split(' '))
-        cross_list = f'**{" ".join(cross_list.split(" ")[0:2])}** {" ".join(cross_list.split(" ")[2:])}'
-        if prereq_act:
-            desc = f'{desc}\n{cross_list}'
+    clist = re.search(r'Cross Listing(s)?: ([^.]+).', course_desc)
+    if clist != None:
+        clist_str = clist.group().strip()
+        clist_sentence = f'**{" ".join(clist_str.split(" ")[0:2])}** {" ".join(clist_str.split(" ")[2:])}'
+        if has_prereq:
+            course_desc = f'{course_desc.replace(clist_str, "")}\n{clist_sentence}'
         else:
-            desc = f'{desc}\n\n{cross_list}'
+            course_desc = f'{course_desc.replace(clist_str, "")}\n\n{clist_sentence}'
 
-    title = f'__**{name}**__ ({credit_num})'
-    SUBJECT_NAME = subjects[f'{subject.upper()}']
-    description = f'**{SUBJECT_NAME}**\n{desc.lstrip()}\n\n{hours_extra}'
-    print(description)
+    title = f'__**{course_name}**__ ({course_cred})'
+    description = f'**{SUBJECT_NAME}**\n{course_desc}\n\n{course_hrs_info}'
 
     embed = discord.Embed(title=title, description=description, color=0x500000)
-    print(course_html)
 
     await ctx.send(embed=embed)
     return
