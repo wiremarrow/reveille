@@ -1,19 +1,25 @@
 import discord
 from discord.ext import commands
+import re
 import json
 import random
 import smtplib
+import requests
 import mysql.connector
+from bs4 import BeautifulSoup
 
 # Initialize config/secret vars
 c = open('config.json')
 s = open('secret.json')
+ss = open('subjects.json')
 
 config = json.load(c)
 secret = json.load(s)
+subjects = json.load(ss)
 
 c.close()
 s.close()
+ss.close()
 
 PREFIX = config['BOT_COMMAND_PREFIX']
 TOKEN = secret['BOT_TOKEN']
@@ -213,5 +219,55 @@ async def is_user_verified(ctx, member : discord.Member):
         await ctx.send(f'{member.mention} is verified.')
     else:
         await ctx.send(f'{member.mention} is not verified.')
+
+# Displays info embed for specified course using TAMU catalog search
+@bot.command()
+async def course(ctx, subject, num):
+    search_url = f'https://catalog.tamu.edu/search/?search={subject}+{num}'
+    html = requests.get(search_url).content
+    soup = BeautifulSoup(html, 'html.parser')
+
+    course_html = soup.find(class_='searchresult search-courseresult')
+
+    name = course_html.find('h2').text
+    credit = course_html.find(class_='hours noindent').text
+    desc = course_html.find(class_='courseblockdesc').text
+
+    credit_parts = [x for x in credit.split('\n') if x != '']
+    print(credit_parts)
+    credit_num = f'{" ".join(credit_parts[0].split(" ")[1:]).split(".")[0]} {credit_parts[0].split(" ")[0].lower()}'
+    hours_extra = '\n'.join(credit_parts[1:])
+
+    prereq_act = False
+
+    prereq = re.search(r'Prerequisite(s)?: ([^.]+).', desc)
+    if prereq != None:
+        prereq_act = True
+        prereq = prereq.group()
+        desc = desc.replace(prereq, '')
+        prereq = f'**{prereq.split(" ")[0]}** {" ".join(prereq.split(" ")[1:])}'
+        desc = f'{desc}\n{prereq}'
+    
+    cross_list = re.search(r'Cross Listing(s)?: ([^.]+).', desc)
+    if cross_list != None:
+        cross_list = cross_list.group()
+        desc = desc.replace(cross_list, '')
+        print(cross_list.split(' '))
+        cross_list = f'**{" ".join(cross_list.split(" ")[0:2])}** {" ".join(cross_list.split(" ")[2:])}'
+        if prereq_act:
+            desc = f'{desc}\n{cross_list}'
+        else:
+            desc = f'{desc}\n\n{cross_list}'
+
+    title = f'__**{name}**__ ({credit_num})'
+    SUBJECT_NAME = subjects[f'{subject.upper()}']
+    description = f'**{SUBJECT_NAME}**\n{desc.lstrip()}\n\n{hours_extra}'
+    print(description)
+
+    embed = discord.Embed(title=title, description=description, color=0x500000)
+    print(course_html)
+
+    await ctx.send(embed=embed)
+    return
 
 bot.run(TOKEN)
