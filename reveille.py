@@ -79,11 +79,13 @@ bot = commands.Bot(command_prefix=PREFIX, help_command=None)
 # Sends embed w/ list of commands (command syntax, arguments, + description)
 @bot.command()
 async def help(ctx):
-    title = '**Command Help Menu**'
-    description = (f'`{PREFIX}help` - Produces this menu for command syntax and descriptions.\n'
+    title = 'Command Help Menu'
+    description = (f'`{PREFIX}help` - Produces this menu for command descriptions and syntax.\n'
                    f'`{PREFIX}register <net_id>` - Register your NetID with the bot to verify yourself.\n'
                    f'`{PREFIX}verify <verif_code>` - Verifies user if correct verification code is passed.\n'
-                   f'`{PREFIX}is_verified <@user>` - Checks if a user has verified their NetID.')
+                   f'`{PREFIX}is_verified <@user>` - Checks if a user has verified their NetID.\n'
+                   f'`{PREFIX}course <subject_code> <course_num>` - Returns info about a specified course.\n'
+                   f'`{PREFIX}calendar <event_num>` - Lists chosen number of school events from now.')
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
@@ -259,7 +261,7 @@ async def course(ctx, subject_code, course_num):
         else:
             course_desc = f'{course_desc.replace(clist_str, "")}\n\n{clist_sentence}'
 
-    title = f'__**{course_name}**__ ({course_cred})'
+    title = f'__{course_name}__ ({course_cred})'
     description = f'**{SUBJECT_NAME}**\n{course_desc}\n\n{course_hrs_info}'
 
     embed = discord.Embed(title=title, description=description, color=0x500000)
@@ -285,7 +287,7 @@ async def calendar(ctx, event_num):
         index = index + 1
 
         title = event.name
-        description = event.description.split('\n')[0]
+        description = "".join(x for x in event.description.split('\n')[0] if ord(x) < 128)
         color = 0x500000
         footer = event.begin.format("MMMM DD")
 
