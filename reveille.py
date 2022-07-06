@@ -2,10 +2,12 @@ import discord
 from discord.ext import commands
 import re
 import json
+import arrow
 import random
 import smtplib
 import requests
 import mysql.connector
+from ics import Calendar
 from bs4 import BeautifulSoup
 
 # Initialize config/secret vars
@@ -226,8 +228,8 @@ async def course(ctx, subject_code, course_num):
     SUBJECT_NAME = subjects[f'{subject_code.upper()}']
 
     search_url = f'https://catalog.tamu.edu/search/?search={subject_code.upper()}+{course_num}'
-    html = requests.get(search_url).content
-    soup = BeautifulSoup(html, 'html.parser')
+    html_str = requests.get(search_url).content
+    soup = BeautifulSoup(html_str, 'html.parser')
 
     course_html = soup.find(class_='searchresult search-courseresult')
 
@@ -263,6 +265,37 @@ async def course(ctx, subject_code, course_num):
     embed = discord.Embed(title=title, description=description, color=0x500000)
 
     await ctx.send(embed=embed)
+    return
+
+# Sends first event_num calendar events in the TAMU academic calendar from now
+@bot.command()
+async def calendar(ctx, event_num):
+    calendar_url = 'https://registrar.tamu.edu/Catalogs,-Policies-Procedures/Academic-Calendar/Second-Fall/Download-Calendar'
+    ics_str = requests.get(calendar_url, verify=False).text
+    calendar = Calendar(ics_str)
+
+    now = arrow.utcnow()
+    events = list(calendar.timeline.start_after(now.shift(days=-1)))
+
+    index = 0
+    for event in events:
+        if index == int(event_num):
+            return
+
+        index = index + 1
+
+        title = event.name
+        description = event.description.split('\n')[0]
+        color = 0x500000
+        footer = event.begin.format("MMMM DD")
+
+        if event.begin.day != event.end.shift(minutes=-1).day:
+            footer = f'{event.begin.format("MMMM DD")} - {event.end.shift(minutes=-1).format("MMMM DD")}'
+
+        embed = discord.Embed(title=title, description=description, color=color)
+        embed.set_footer(text=footer)
+
+        await ctx.send(embed=embed)
     return
 
 bot.run(TOKEN)
