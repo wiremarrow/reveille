@@ -85,7 +85,8 @@ async def help(ctx):
                    f'`{PREFIX}verify <verif_code>` - Verifies user if correct verification code is passed.\n'
                    f'`{PREFIX}is_verified <@user>` - Checks if a user has verified their NetID.\n'
                    f'`{PREFIX}course <subject_code> <course_num>` - Returns info about a specified course.\n'
-                   f'`{PREFIX}calendar <event_num>` - Lists chosen number of school events from now.')
+                   f'`{PREFIX}calendar <event_num>` - Lists chosen number of school events from now.\n'
+                   f'`{PREFIX}search <search_num> <*terms>` - Shows chosen number of results for search terms.')
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
@@ -297,6 +298,115 @@ async def calendar(ctx, event_num):
         embed = discord.Embed(title=title, description=description, color=color)
         embed.set_footer(text=footer)
 
+        await ctx.send(embed=embed)
+    return
+
+# Returns information for search terms from TAMU directory search
+@bot.command()
+async def search(ctx, search_num, *terms):
+    search_url = f'https://directory.tamu.edu/?branch=people&cn={"+".join(terms)}'
+    html_str = requests.get(search_url).content
+    soup = BeautifulSoup(html_str, 'html.parser')
+
+    profile = soup.find_all(class_='link--secondary link--hollow-maroon')
+
+    index = 0
+    for ss in profile:
+        if index == int(search_num):
+            return
+
+        index = index + 1
+
+        profile_url = f'https://directory.tamu.edu/{ss["href"]}'
+        html2_str = requests.get(profile_url).content
+        soup = BeautifulSoup(html2_str, 'html.parser')
+
+        res = soup.find(class_='result-listing')
+        name = f'__{res.find("h2").text}__'
+        contact = res.find(class_='contact-info')
+        add_info = res.find(class_='additional-info')
+
+        person_title = re.search(r'<strong>(.*)<\/strong>', str(contact))
+        if person_title is not None:
+            person_title = person_title.group(1)
+        email = re.search(r'<a href="mailto:(.*@tamu.edu)">', str(contact))
+        if email is not None:
+            email = email.group(1)
+        phone = re.search(r'<br\/>[\s\S]*(\(\d{3}\) \d{3}-\d{4}).*<br\/>', str(contact))
+        if phone is not None:
+            phone = phone.group(1)
+
+        address = ''
+
+        part_two = contact.find_all('p')
+        if len(part_two) >= 2:
+            address_parts = re.search(r'<p>[\s]*(.*)[\s]*<\/p>', str(part_two[1]))
+            if address_parts is not None:
+                address_parts = address_parts.group(1).replace('&amp;', '&')
+                address = '\n'.join(address_parts.split('<br/>'))
+        
+        right_sections = add_info.find_all('li')
+
+        s1 = None
+        s2 = None
+
+        s1_title = None
+        s1_desc = None
+        s2_title = None
+        s2_desc = None
+
+        if len(right_sections) >= 1:
+            s1 = right_sections[0]
+            s1_title = re.search(r'<h3 class="identification-title">(.*)<\/h3>(.*)<\/li>', str(s1)).group(1).replace('&amp;', '&')
+            s1_desc = re.search(r'<h3 class="identification-title">(.*)<\/h3>(.*)<\/li>', str(s1)).group(2).replace('&amp;', '&')
+        if len(right_sections) >= 2:
+            s2 = right_sections[1]
+            s2_title = re.search(r'<h3 class="identification-title">(.*)<\/h3>(.*)<\/li>', str(s2)).group(1).replace('&amp;', '&')
+            s2_desc = re.search(r'<h3 class="identification-title">(.*)<\/h3>(.*)<\/li>', str(s2)).group(2).replace('&amp;', '&')
+
+        field1 = ''
+
+        if person_title is not None:
+            if field1 == '':
+                field1 = person_title
+            else:
+                field1 = f'{field1}\n{person_title}'
+        if email is not None:
+            if field1 == '':
+                field1 = email
+            else:
+                field1 = f'{field1}\n{email}'
+        if phone is not None:
+            if field1 == '':
+                field1 = phone
+            else: field1 = f'{field1}\n{phone}'
+        if address is not None:
+            if field1 == '':
+                field1 = address
+            else:
+                field1 = f'{field1}\n\n{address}'
+
+        color = 0x500000
+
+        embed = discord.Embed(title=name, color=color)
+
+        if field1 != '':
+            embed.add_field(name='Contact', value=field1, inline=True)
+
+        info_desc = ''
+
+        if s1_title is not None and s1_desc is not None:
+            info_desc = f'__{s1_title}__\n{s1_desc}'
+        
+        if s2_title is not None and s2_desc is not None:
+            if info_desc != '':
+                info_desc = f'{info_desc}\n\n__{s2_title}__\n{s2_desc}'
+            else:
+                info_desc = f'__{s2_title}__\n{s2_desc}'
+        
+        if info_desc != '':
+            embed.add_field(name='Information', value=info_desc, inline=True)
+        
         await ctx.send(embed=embed)
     return
 
