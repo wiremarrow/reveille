@@ -411,7 +411,6 @@ async def search(ctx, search_num, *terms):
         await ctx.send(embed=embed)
     return
 
-
 # Shows embed w/ school resources using quick-access hyperlinks
 @bot.command()
 async def resources(ctx):
