@@ -410,4 +410,22 @@ async def search(ctx, search_num, *terms):
         await ctx.send(embed=embed)
     return
 
+
+# Shows embed w/ school resources using quick-access hyperlinks
+@bot.command()
+async def resources(ctx):
+    title = 'School Resources Panel'
+    color = 0x500000
+
+    embed = discord.Embed(title=title, color=color)
+    embed.add_field(name=':page_facing_up: Texas A&M Website', value='The official TAMU homepage consolidates most school resources and information. [Go](https://www.tamu.edu).', inline=True)
+    embed.add_field(name=':wave: Howdy Web Portal', value='A comprehensive web portal connecting students, faculty, staff, etc. with online TAMU services. [Go](https://howdy.tamu.edu).', inline=True)
+    embed.add_field(name=':books: TAMU Library', value='An online library system for Texas A&M aggregating books journals, and research databases. [Go](https://library.tamu.edu).', inline=True)
+    embed.add_field(name=':computer: IT Help Desk Central', value='Provides reliable and timely IT service assistance/solutions on behalf of the Department of IT. [Go](https://it.tamu.edu/help).', inline=True)
+    embed.add_field(name=':envelope: Gmail', value='Access your TAMU email account through Gmail along with other Google Workspace applications. [Go](https://mail.google.com).', inline=True)
+    embed.add_field(name=':pill: Student Health Services', value='Helpful information and links for accessing a variety of TAMU medical services. [Go](https://shs.tamu.edu/services).', inline=True)
+
+    await ctx.send(embed=embed)
+    return
+
 bot.run(TOKEN)
