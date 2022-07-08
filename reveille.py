@@ -31,6 +31,7 @@ SQL_USER = config['SQL_USER']
 SQL_PASS = secret['SQL_PASS']
 DB_NAME = config['SQL_DB_NAME']
 USER_TBL_NAME = config['SQL_USER_TBL_NAME']
+WELC_CHNL_ID = config['WELC_CHANNEL_ID']
 
 # Checks DB for registration val lookup from discord_user_id (duid)
 async def is_registered(ctx, duid):
@@ -74,7 +75,18 @@ async def is_verified(ctx, duid):
         await ctx.send(f'Something went wrong while checking for user verification. {e}')
         return 404
 
-bot = commands.Bot(command_prefix=PREFIX, help_command=None)
+intents = discord.Intents.default()
+intents.members = True
+
+bot = commands.Bot(command_prefix=PREFIX, help_command=None, intents=intents)
+
+# Automatic welcome message for new member joins
+@bot.event
+async def on_member_join(member):
+    channel = bot.get_channel(WELC_CHNL_ID)
+
+    await channel.send(f'Welcome to the Texas A&M 2026+ Discord, {member.mention}! To see the rest of the server, please introduce yourself with your name/nickname, major/school, year.')
+    return
 
 # Sends embed w/ list of commands (command syntax, arguments, + description)
 @bot.command()
@@ -92,6 +104,7 @@ async def help(ctx):
 
     embed = discord.Embed(title=title, description=description, color=color)
     await ctx.send(embed=embed)
+    return
 
 # Initiates registration process w/ email verification (paired w/ verify command for verif completion)
 @bot.command()
