@@ -86,7 +86,8 @@ async def help(ctx):
                    f'`{PREFIX}is_verified <@user>` - Checks if a user has verified their NetID.\n'
                    f'`{PREFIX}course <subject_code> <course_num>` - Returns info about a specified course.\n'
                    f'`{PREFIX}calendar <event_num>` - Lists chosen number of school events from now.\n'
-                   f'`{PREFIX}search <search_num> <*terms>` - Shows chosen number of results for search terms.')
+                   f'`{PREFIX}search <search_num> <*terms>` - Shows chosen number of results for search terms.\n'
+                   f'`{PREFIX}resoucres` - Displays school resoucres with descriptions and hyperlinks.')
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
