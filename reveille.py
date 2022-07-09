@@ -444,7 +444,7 @@ async def resources(ctx):
 
 # Add a class registry for a particular section to course DB
 @bot.command()
-async def add_course(ctx, subject_code, course_num, section_num):
+async def add_class(ctx, subject_code, course_num, section_num):
     discord_user_id = ctx.message.author.id
 
     # Criteria restriction filter
@@ -481,10 +481,63 @@ async def add_course(ctx, subject_code, course_num, section_num):
 
         db.commit()
     except Exception as e:
-        await ctx.send(f'Something went wrong while adding course to database. {e}')
+        await ctx.send(f'Something went wrong while adding class to database. {e}')
         return
 
     await ctx.send(f'Successfully added your {subject_code} {course_num} class for section {section_num} to your schedule.')
     return
+
+# Show user schedule from course DB
+@bot.command()
+async def schedule(ctx):
+    discord_user_id = ctx.message.author.id
+
+    # Criteria restriction filter
+    is_reg = await is_registered(ctx, discord_user_id)
+    if (is_reg == 404):
+        return
+    elif (not is_reg):
+        await ctx.send('You can\'t manage a schedule if you are not registered.')
+        return
+
+    is_ver = await is_verified(ctx, discord_user_id)
+    if (is_ver == 404):
+        return
+    elif (not is_ver):
+        await ctx.send('You can\'t manage a schedule if you are not verified.')
+        return
+
+    try:
+        db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
+        cur = db.cursor()
+        cur.execute(f'SELECT * FROM {COURSE_TBL_NAME} '
+                    f'WHERE discord_user_id = {discord_user_id}')
+
+        courses = cur.fetchall()
+
+        title = f'__{ctx.message.author.name}\'s Schedule__'
+        description = ''
+        color = 0x500000
+
+        total_hours = 0
+
+        for i in range(len(courses)):
+            description = f'{description}\n`{i+1}` **{courses[i][2]} {courses[i][3]}**-{courses[i][4]} ({courses[i][1]})'
+            total_hours = total_hours + courses[i][1]
+        
+        description = description.strip()
+
+        if description == '':
+            await ctx.send('You don\'t have any classes in your schedule.')
+            return
+
+        description = f'{description}\n\n**Total Credits:** {total_hours}'
+
+        embed = discord.Embed(title=title, description=description, color=color)
+
+        await ctx.send(embed=embed)
+    except Exception as e:
+        await ctx.send(f'Something went wrong while retrieving courses from database. {e}')
+        return
 
 bot.run(TOKEN)
