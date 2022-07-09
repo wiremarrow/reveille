@@ -31,6 +31,7 @@ SQL_USER = config['SQL_USER']
 SQL_PASS = secret['SQL_PASS']
 DB_NAME = config['SQL_DB_NAME']
 USER_TBL_NAME = config['SQL_USER_TBL_NAME']
+COURSE_TBL_NAME = config['SQL_COURSE_TBL_NAME']
 WELC_CHNL_ID = config['WELC_CHANNEL_ID']
 
 # Checks DB for registration val lookup from discord_user_id (duid)
@@ -439,6 +440,51 @@ async def resources(ctx):
     embed.add_field(name=':pill: Student Health Services', value='Helpful information and links for accessing a variety of TAMU medical services. [Go](https://shs.tamu.edu/services).', inline=True)
 
     await ctx.send(embed=embed)
+    return
+
+# Add a class registry for a particular section to course DB
+@bot.command()
+async def add_course(ctx, subject_code, course_num, section_num):
+    discord_user_id = ctx.message.author.id
+
+    # Criteria restriction filter
+    is_reg = await is_registered(ctx, discord_user_id)
+    if (is_reg == 404):
+        return
+    elif (not is_reg):
+        await ctx.send('You can\'t add a course if you are not registered.')
+        return
+
+    is_ver = await is_verified(ctx, discord_user_id)
+    if (is_ver == 404):
+        return
+    elif (not is_ver):
+        await ctx.send('You can\'t add a course if you are not verified.')
+        return
+
+    search_url = f'https://catalog.tamu.edu/search/?search={subject_code.upper()}+{course_num}'
+    html_str = requests.get(search_url).content
+    soup = BeautifulSoup(html_str, 'html.parser')
+
+    course_html = soup.find(class_='searchresult search-courseresult')
+    course_hrs = course_html.find(class_='hours noindent').text.strip()
+
+    hours_parts = [x.strip() for x in course_hrs.split('\n') if x != '']
+    course_cred = " ".join(hours_parts[0].split(" ")[1:]).split(".")[0]
+    course_hours = int(course_cred[0])
+    
+    try:
+        db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
+        cur = db.cursor()
+        cur.execute(f'INSERT INTO {COURSE_TBL_NAME} (discord_user_id, course_hours, subject_code, course_num, section_num) '
+                    f'VALUES ({discord_user_id}, {course_hours}, \'{subject_code.upper()}\', {course_num}, {section_num})')
+
+        db.commit()
+    except Exception as e:
+        await ctx.send(f'Something went wrong while adding course to database. {e}')
+        return
+
+    await ctx.send(f'Successfully added your {subject_code} {course_num} class for section {section_num} to your schedule.')
     return
 
 bot.run(TOKEN)
