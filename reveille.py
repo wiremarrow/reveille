@@ -442,7 +442,7 @@ async def resources(ctx):
     await ctx.send(embed=embed)
     return
 
-# Add a class registry for a particular section to course DB
+# Add a class for a particular section to course DB
 @bot.command()
 async def add_class(ctx, subject_code, course_num, section_num):
     discord_user_id = ctx.message.author.id
@@ -452,14 +452,14 @@ async def add_class(ctx, subject_code, course_num, section_num):
     if (is_reg == 404):
         return
     elif (not is_reg):
-        await ctx.send('You can\'t add a course if you are not registered.')
+        await ctx.send('You can\'t add a class if you are not registered.')
         return
 
     is_ver = await is_verified(ctx, discord_user_id)
     if (is_ver == 404):
         return
     elif (not is_ver):
-        await ctx.send('You can\'t add a course if you are not verified.')
+        await ctx.send('You can\'t add a class if you are not verified.')
         return
 
     search_url = f'https://catalog.tamu.edu/search/?search={subject_code.upper()}+{course_num}'
@@ -484,7 +484,44 @@ async def add_class(ctx, subject_code, course_num, section_num):
         await ctx.send(f'Something went wrong while adding class to database. {e}')
         return
 
-    await ctx.send(f'Successfully added your {subject_code} {course_num} class for section {section_num} to your schedule.')
+    await ctx.send(f'Successfully added your {subject_code.upper()} {course_num} class for section {section_num} to your schedule.')
+    return
+
+# Remove a class for a particular section from course DB
+@bot.command()
+async def remove_class(ctx, subject_code, course_num, section_num):
+    discord_user_id = ctx.message.author.id
+
+    # Criteria restriction filter
+    is_reg = await is_registered(ctx, discord_user_id)
+    if (is_reg == 404):
+        return
+    elif (not is_reg):
+        await ctx.send('You can\'t remove a class if you are not registered.')
+        return
+
+    is_ver = await is_verified(ctx, discord_user_id)
+    if (is_ver == 404):
+        return
+    elif (not is_ver):
+        await ctx.send('You can\'t remove a class if you are not verified.')
+        return
+
+    try:
+        db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
+        cur = db.cursor()
+        cur.execute(f'DELETE FROM {COURSE_TBL_NAME} '
+                    f'WHERE discord_user_id = {discord_user_id} '
+                    f'AND subject_code = \'{subject_code.upper()}\' '
+                    f'AND course_num = {course_num} '
+                    f'AND section_num = {section_num}')
+
+        db.commit()
+    except Exception as e:
+        await ctx.send(f'Something went wrong while removing class from database. {e}')
+        return
+
+    await ctx.send(f'Successfully removed your {subject_code.upper()} {course_num} class for section {section_num} from your schedule.')
     return
 
 # Show user schedule from course DB
@@ -537,7 +574,7 @@ async def schedule(ctx):
 
         await ctx.send(embed=embed)
     except Exception as e:
-        await ctx.send(f'Something went wrong while retrieving courses from database. {e}')
+        await ctx.send(f'Something went wrong while retrieving classes from database. {e}')
         return
 
 bot.run(TOKEN)
