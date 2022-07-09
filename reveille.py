@@ -253,6 +253,9 @@ async def course(ctx, subject_code, course_num):
     soup = BeautifulSoup(html_str, 'html.parser')
 
     course_html = soup.find(class_='searchresult search-courseresult')
+    if course_html is None:
+        await ctx.send('The course you inputted wasn\'t recognized.')
+        return
 
     course_name = course_html.find('h2').text
     course_hrs = course_html.find(class_='hours noindent').text.strip()
@@ -470,6 +473,11 @@ async def add_class(ctx, subject_code, course_num, section_num):
     soup = BeautifulSoup(html_str, 'html.parser')
 
     course_html = soup.find(class_='searchresult search-courseresult')
+    if course_html is None:
+        await ctx.send('The course you inputted wasn\'t recognized.')
+        return
+
+    course_html = soup.find(class_='searchresult search-courseresult')
     course_hrs = course_html.find(class_='hours noindent').text.strip()
 
     hours_parts = [x.strip() for x in course_hrs.split('\n') if x != '']
@@ -555,7 +563,7 @@ async def schedule(ctx):
 
         courses = cur.fetchall()
 
-        title = f'__{ctx.message.author.name}\'s Schedule__'
+        title = f'__{ctx.message.author.display_name}\'s Schedule__'
         description = ''
         color = 0x500000
 
@@ -578,6 +586,70 @@ async def schedule(ctx):
         await ctx.send(embed=embed)
     except Exception as e:
         await ctx.send(f'Something went wrong while retrieving classes from database. {e}')
+        return
+
+# Iterates through users that have specified course in their schedule
+@bot.command()
+async def students(ctx, subject_code, course_num):
+    discord_user_id = ctx.message.author.id
+
+    # Criteria restriction filter
+    is_reg = await is_registered(ctx, discord_user_id)
+    if (is_reg == 404):
+        return
+    elif (not is_reg):
+        await ctx.send('You can\'t query a student class search if you are not registered.')
+        return
+
+    is_ver = await is_verified(ctx, discord_user_id)
+    if (is_ver == 404):
+        return
+    elif (not is_ver):
+        await ctx.send('You can\'t query a student class search if you are not verified.')
+        return
+
+    search_url = f'https://catalog.tamu.edu/search/?search={subject_code.upper()}+{course_num}'
+    html_str = requests.get(search_url).content
+    soup = BeautifulSoup(html_str, 'html.parser')
+
+    course_html = soup.find(class_='searchresult search-courseresult')
+    if course_html is None:
+        await ctx.send('The course you inputted wasn\'t recognized.')
+        return
+
+    course_name = course_html.find('h2').text
+
+    try:
+        db = mysql.connector.connect(host='localhost', user=SQL_USER, passwd=SQL_PASS, database=DB_NAME)
+        cur = db.cursor()
+        cur.execute(f'SELECT DISTINCT discord_user_id FROM {COURSE_TBL_NAME} '
+                    f'WHERE subject_code = \'{subject_code.upper()}\' '
+                    f'AND course_num = {course_num}')
+
+        students = cur.fetchall()
+
+        title = f'__Students in {subject_code} {course_num}__'
+        description = ''
+        color = 0x500000
+
+        for i in range(len(students)):
+            user_id = students[i][0]
+            user = bot.get_user(user_id)
+            description = f'{description}\n`{i+1}` {user.display_name} ({user.name}#{user.discriminator})'
+
+        description = description.strip()
+
+        if description == '':
+            await ctx.send('No other verified students appear in the specified course.')
+            return
+
+        description = f'**{course_name}**\n{description}'
+
+        embed = discord.Embed(title=title, description=description, color=color)
+
+        await ctx.send(embed=embed)
+    except Exception as e:
+        await ctx.send(f'Something went wrong while accessing student classes from database. {e}')
         return
 
 bot.run(TOKEN)
