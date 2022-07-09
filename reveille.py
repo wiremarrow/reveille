@@ -100,7 +100,10 @@ async def help(ctx):
                    f'`{PREFIX}course <subject_code> <course_num>` - Returns info about a specified course.\n'
                    f'`{PREFIX}calendar <event_num>` - Lists chosen number of school events from now.\n'
                    f'`{PREFIX}search <search_num> <*terms>` - Shows chosen number of results for search terms.\n'
-                   f'`{PREFIX}resources` - Displays school resources with descriptions and hyperlinks.')
+                   f'`{PREFIX}resources` - Displays school resources with descriptions and hyperlinks.\n'
+                   f'`{PREFIX}add_class <subject_code> <course_num> <section_num>` - Adds a class to schedule.\n'
+                   f'`{PREFIX}remove_class <subject_code> <course_num> <section_num>` - Removes a class from schedule.\n'
+                   f'`{PREFIX}schedule` - Enumerates classes in schedule with credit information.')
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
