@@ -86,7 +86,7 @@ bot = commands.Bot(command_prefix=PREFIX, help_command=None, intents=intents)
 async def on_member_join(member):
     channel = bot.get_channel(WELC_CHNL_ID)
 
-    await channel.send(f'Welcome to the Texas A&M 2026+ Discord, {member.mention}! To see the rest of the server, please introduce yourself with your name/nickname, major/school, year.')
+    await channel.send(f'Welcome to the Texas A&M 2026+ Discord, {member.mention}! To see the rest of the server, please introduce yourself with your name/nickname, major/school, and year.')
     return
 
 # Sends embed w/ list of commands (command syntax, arguments, + description)
@@ -103,7 +103,8 @@ async def help(ctx):
                    f'`{PREFIX}resources` - Displays school resources with descriptions and hyperlinks.\n'
                    f'`{PREFIX}add_class <subject_code> <course_num> <section_num>` - Adds a class to schedule.\n'
                    f'`{PREFIX}remove_class <subject_code> <course_num> <section_num>` - Removes a class from schedule.\n'
-                   f'`{PREFIX}schedule` - Enumerates classes in schedule with credit information.')
+                   f'`{PREFIX}schedule` - Enumerates classes in schedule with credit information.\n'
+                   f'`{PREFIX}students <subject_code> <course_num>` - Finds the students taking a specified course.')
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
