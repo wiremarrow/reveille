@@ -86,7 +86,7 @@ bot = commands.Bot(command_prefix=PREFIX, help_command=None, intents=intents)
 async def on_member_join(member):
     channel = bot.get_channel(WELC_CHNL_ID)
 
-    await channel.send(f'Welcome to the Texas A&M 2026+ Discord, {member.mention}! To see the rest of the server, please introduce yourself with your name/nickname, major/school, and year.')
+    await channel.send(f'Howdy, {member.mention}! Welcome to the Texas A&M 2026+ Discord server. To see the rest of the server, please introduce yourself with your name/nickname, major/school, and year.')
     return
 
 # Sends embed w/ list of commands (command syntax, arguments, + description)
@@ -441,10 +441,12 @@ async def resources(ctx):
     embed = discord.Embed(title=title, color=color)
     embed.add_field(name=':page_facing_up: Texas A&M Website', value='The official TAMU homepage consolidates most school resources and information. [Go](https://www.tamu.edu).', inline=True)
     embed.add_field(name=':wave: Howdy Web Portal', value='A comprehensive web portal connecting students, faculty, staff, etc. with online TAMU services. [Go](https://howdy.tamu.edu).', inline=True)
-    embed.add_field(name=':books: TAMU Library', value='An online library system for Texas A&M aggregating books journals, and research databases. [Go](https://library.tamu.edu).', inline=True)
+    embed.add_field(name=':books: TAMU Library', value='An online library system for Texas A&M aggregating books, journals, and research databases. [Go](https://library.tamu.edu).', inline=True)
     embed.add_field(name=':computer: IT Help Desk Central', value='Provides reliable and timely IT service assistance/solutions on behalf of the Department of IT. [Go](https://it.tamu.edu/help).', inline=True)
     embed.add_field(name=':envelope: Gmail', value='Access your TAMU email account through Gmail along with other Google Workspace applications. [Go](https://mail.google.com).', inline=True)
     embed.add_field(name=':pill: Student Health Services', value='Helpful information and links for accessing a variety of TAMU medical services. [Go](https://shs.tamu.edu/services).', inline=True)
+    embed.add_field(name=':map: Interactive Campus Map', value='A dynamic and layered digital map of the TAMU campus with search functionality. [Go](https://www.tamu.edu/map).', inline=True)
+    embed.add_field(name=':card_box: Canvas', value='Texas A&M\'s official learning management system which integrates most course administration [Go](https://canvas.tamu.edu).', inline=True)
 
     await ctx.send(embed=embed)
     return
@@ -629,7 +631,7 @@ async def students(ctx, subject_code, course_num):
 
         students = cur.fetchall()
 
-        title = f'__Students in {subject_code} {course_num}__'
+        title = f'__Students in {subject_code.upper()} {course_num}__'
         description = ''
         color = 0x500000
 
