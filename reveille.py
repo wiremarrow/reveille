@@ -86,7 +86,7 @@ bot = commands.Bot(command_prefix=PREFIX, help_command=None, intents=intents)
 async def on_member_join(member):
     channel = bot.get_channel(WELC_CHNL_ID)
 
-    await channel.send(f'Howdy, {member.mention}! Welcome to the Texas A&M 2026+ Discord server. To see the rest of the server, please introduce yourself with your name/nickname, major/school, and year.')
+    await channel.send(f'Howdy, {member.mention}! Welcome to the Texas A&M University Class of 2026+ Discord server. To see the rest of the server, please introduce yourself with your name/nickname, major/school, and year.')
     return
 
 # Sends embed w/ list of commands (command syntax, arguments, + description)
