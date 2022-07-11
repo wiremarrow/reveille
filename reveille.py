@@ -93,7 +93,7 @@ async def on_member_join(member):
 @bot.command()
 async def help(ctx):
     title = 'Command Help Menu'
-    description = (f'`{PREFIX}help` - Produces this menu for command descriptions and syntax.\n'
+    description = (f'`{PREFIX}help` - Produces a help menu for command descriptions and syntax.\n'
                    f'`{PREFIX}register <net_id>` - Register your NetID with the bot to verify yourself.\n'
                    f'`{PREFIX}verify <verif_code>` - Verifies user if correct verification code is passed.\n'
                    f'`{PREFIX}is_verified <@user>` - Checks if a user has verified their NetID.\n'
