@@ -309,7 +309,7 @@ async def calendar(ctx, event_num):
 
         index = index + 1
 
-        title = event.name
+        title = f'__{event.name}__'
         description = "".join(x for x in event.description.split('\n')[0] if ord(x) < 128)
         color = 0x500000
         footer = event.begin.format("MMMM DD")
