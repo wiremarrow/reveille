@@ -447,6 +447,7 @@ async def resources(ctx):
     embed.add_field(name=':pill: Student Health Services', value='Helpful information and links for accessing a variety of TAMU medical services. [Go](https://shs.tamu.edu/services).', inline=True)
     embed.add_field(name=':map: Interactive Campus Map', value='A dynamic and layered digital map of the TAMU campus with search functionality. [Go](https://www.tamu.edu/map).', inline=True)
     embed.add_field(name=':card_box: Canvas', value='Texas A&M\'s official learning management system which integrates most course administration. [Go](https://canvas.tamu.edu).', inline=True)
+    embed.add_field(name=':printer: Aggie Print', value='Unified on-the-go online printing to Open Access Labs print kiosks. [Go](https://aggieprint.tamu.edu/myprintcenter).', inline=True)
 
     await ctx.send(embed=embed)
     return
