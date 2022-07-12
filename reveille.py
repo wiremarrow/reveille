@@ -656,46 +656,47 @@ async def students(ctx, subject_code, course_num):
         await ctx.send(f'Something went wrong while accessing student classes from database. {e}')
         return
 
-# Lists all food options on campus with operating times
+# Lists all food options on campus w/ operating times and open status
 @bot.command()
 async def nom(ctx):
-    now = arrow.now().to('US/Central')
+    now = arrow.utcnow().to('US/Central')
     fnow = now.format('YYYY-MM-DD HH:mm:ss.SSS')
     fnow = f'{fnow[:10]}T{fnow[10:]}Z'
 
-    search_url = f'https://api.dineoncampus.com/v1/locations/weekly_schedule?site_id=5751fd4290975b60e0489534&date={now}'
+    search_url = f'https://api.dineoncampus.com/v1/locations/weekly_schedule?site_id=5751fd4290975b60e0489534&date={fnow}'
     json_str = requests.get(search_url).content
-
-    day_num = int(now.format('d')) - 1
 
     weekly_schedule = json.loads(json_str)
     locations = weekly_schedule['the_locations']
 
+    day_num = int(now.format('d')) - 1
+
     vendors = []
 
     for location in locations:
-        is_active = location['active']
-        info = location['week'][day_num]
-        takes_apple_pay = location['pay_with_apple_pay']
-        takes_cash = location['pay_with_cash']
-        takes_cc = location['pay_with_cc']
-        takes_dining_dollars = location['pay_with_dining_dollars']
-        takes_google_pay = location['pay_with_google_pay']
-        takes_meal_exchange = location['pay_with_meal_exchange']
-        takes_meal_trade = location['pay_with_meal_trade']
-        takes_meal_swipe = location['pay_with_meal_swipe']
-        takes_retail_swipe = location['pay_with_retail_swipe']
-        takes_samsung_pay = location['pay_with_samsung_pay']
-        takes_meal_plan = location['pay_with_meal_plan']
+        # is_active = location['active']
+        # info = location['week'][day_num]
+        # takes_apple_pay = location['pay_with_apple_pay']
+        # takes_cash = location['pay_with_cash']
+        # takes_cc = location['pay_with_cc']
+        # takes_dining_dollars = location['pay_with_dining_dollars']
+        # takes_google_pay = location['pay_with_google_pay']
+        # takes_meal_exchange = location['pay_with_meal_exchange']
+        # takes_meal_trade = location['pay_with_meal_trade']
+        # takes_meal_swipe = location['pay_with_meal_swipe']
+        # takes_retail_swipe = location['pay_with_retail_swipe']
+        # takes_samsung_pay = location['pay_with_samsung_pay']
+        # takes_meal_plan = location['pay_with_meal_plan']
         name = location['name']
 
         day_info = [x for x in location['week'] if x['day'] == day_num][0]
-        is_closed = day_info['closed']
+        day_closed = day_info['closed']
 
-        if not is_closed:
+        if not day_closed:
             hours = day_info['hours']
 
             times = ''
+            is_open = False
 
             for hour in hours:
                 start_hour = hour['start_hour']
@@ -703,23 +704,29 @@ async def nom(ctx):
                 end_hour = hour['end_hour']
                 end_minutes = hour['end_minutes']
 
-                start = arrow.get(now.year, now.month, now.day, start_hour, start_minutes)
-                end = arrow.get(now.year, now.month, now.day, end_hour, end_minutes)
+                start = arrow.get(now.year, now.month, now.day, start_hour, start_minutes, tzinfo='US/Central')
+                end = arrow.get(now.year, now.month, now.day, end_hour, end_minutes, tzinfo='US/Central')
+
+                if start < now and now < end:
+                    is_open = True
 
                 times_str = f'{start.format("h:mm a")} - {end.format("h:mm a")}'
                 times = f'{times}, {times_str}'
 
             times = times[2:]
 
-            vendors.append(f'+ {name} ({times})')
+            if is_open:
+                vendors.append(f'+ {name} ({times}) [OPEN]')
+            else:
+                vendors.append(f'- {name} ({times}) [CLOSED]')
         else:
-            vendors.append(f'- {name} CLOSED')
+            vendors.append(f'- {name} [DAY CLOSED]')
 
     curated_vendors = vendors[1:53]
-    description1 = '\n'.join(curated_vendors[0: len(curated_vendors) // 2]).strip()
-    description2 = '\n'.join(curated_vendors[len(curated_vendors) // 2:]).strip()
+    description1 = '\n'.join(curated_vendors[:len(curated_vendors)//2]).strip()
+    description2 = '\n'.join(curated_vendors[len(curated_vendors)//2:]).strip()
 
-    await ctx.send(f'**All Campus Dining Options** ({now.format("MMM DD @ h:mm a")})\n```diff\n{description1}\n```')
+    await ctx.send(f'**All Campus Dining Options** ({now.format("MM/DD @ h:mm a")})\n```diff\n{description1}\n```')
     await ctx.send(f'```diff\n{description2}\n```')
     return
 
