@@ -98,7 +98,7 @@ async def help(ctx):
                    f'`{PREFIX}verify [verif_code]` - Verifies user if correct verification code is passed.\n'
                    f'`{PREFIX}is_verified [@user]` - Checks if a user has verified their NetID.\n'
                    f'`{PREFIX}course [subject_code] [course_num]` - Returns info about a specified course.\n'
-                   f'`{PREFIX}calendar [event_num]` - Lists chosen number of school events from now.\n'
+                   f'`{PREFIX}calendar (event_num)` - Lists chosen number of school events from now.\n'
                    f'`{PREFIX}search [search_num] [*terms]` - Shows chosen number of results for search terms.\n'
                    f'`{PREFIX}resources` - Displays school resources with descriptions and hyperlinks.\n'
                    f'`{PREFIX}add_class [subject_code] [course_num] [section_num]` - Adds a class to schedule.\n'
@@ -300,7 +300,7 @@ async def course(ctx, subject_code, course_num):
 
 # Sends first event_num calendar events in the TAMU academic calendar from now
 @bot.command()
-async def calendar(ctx, event_num):
+async def calendar(ctx, event_num=3):
     calendar_url = 'https://registrar.tamu.edu/Catalogs,-Policies-Procedures/Academic-Calendar/Second-Fall/Download-Calendar'
     ics_str = requests.get(calendar_url, verify=False).text
     calendar = Calendar(ics_str)
