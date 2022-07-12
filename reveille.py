@@ -658,7 +658,7 @@ async def students(ctx, subject_code, course_num):
 
 # Lists all food options on campus w/ operating times and open status
 @bot.command()
-async def nom(ctx):
+async def nom(ctx, mode='open'):
     now = arrow.utcnow().to('US/Central')
     fnow = now.format('YYYY-MM-DD HH:mm:ss.SSS')
     fnow = f'{fnow[:10]}T{fnow[10:]}Z'
@@ -718,16 +718,27 @@ async def nom(ctx):
             if is_open:
                 vendors.append(f'+ {name} ({times}) [OPEN]')
             else:
-                vendors.append(f'- {name} ({times}) [CLOSED]')
+                if mode == 'all':
+                    vendors.append(f'- {name} ({times}) [CLOSED]')
+
         else:
-            vendors.append(f'- {name} [DAY CLOSED]')
+            if mode == 'all':
+                vendors.append(f'- {name} [DAY CLOSED]')
 
-    curated_vendors = vendors[1:53]
-    description1 = '\n'.join(curated_vendors[:len(curated_vendors)//2]).strip()
-    description2 = '\n'.join(curated_vendors[len(curated_vendors)//2:]).strip()
+    if mode == 'open':
+        description = '\n'.join(vendors)
 
-    await ctx.send(f'**All Campus Dining Options** ({now.format("MM/DD @ h:mm a")})\n```diff\n{description1}\n```')
-    await ctx.send(f'```diff\n{description2}\n```')
-    return
+        await ctx.send(f'**Open Campus Dining Options** ({now.format("MM/DD @ h:mm a")})\n```diff\n{description}\n```')
+        return
+    elif mode == 'all':
+        curated_vendors = vendors[1:53]
+        description1 = '\n'.join(curated_vendors[:len(curated_vendors)//2]).strip()
+        description2 = '\n'.join(curated_vendors[len(curated_vendors)//2:]).strip()
+
+        await ctx.send(f'**All Campus Dining Options** ({now.format("MM/DD @ h:mm a")})\n```diff\n{description1}\n```')
+        await ctx.send(f'```diff\n{description2}\n```')
+        return
+    else:
+        await ctx.send('Invalid command argument.')
 
 bot.run(TOKEN)
