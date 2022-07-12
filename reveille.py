@@ -94,20 +94,26 @@ async def on_member_join(member):
 async def help(ctx):
     title = 'Command Help Menu'
     description = (f'`{PREFIX}help` - Produces a help menu for command descriptions and syntax.\n'
-                   f'`{PREFIX}register <net_id>` - Register your NetID with the bot to verify yourself.\n'
-                   f'`{PREFIX}verify <verif_code>` - Verifies user if correct verification code is passed.\n'
-                   f'`{PREFIX}is_verified <@user>` - Checks if a user has verified their NetID.\n'
-                   f'`{PREFIX}course <subject_code> <course_num>` - Returns info about a specified course.\n'
-                   f'`{PREFIX}calendar <event_num>` - Lists chosen number of school events from now.\n'
-                   f'`{PREFIX}search <search_num> <*terms>` - Shows chosen number of results for search terms.\n'
+                   f'`{PREFIX}register [net_id]` - Register your NetID with the bot to verify yourself.\n'
+                   f'`{PREFIX}verify [verif_code]` - Verifies user if correct verification code is passed.\n'
+                   f'`{PREFIX}is_verified [@user]` - Checks if a user has verified their NetID.\n'
+                   f'`{PREFIX}course [subject_code] [course_num]` - Returns info about a specified course.\n'
+                   f'`{PREFIX}calendar [event_num]` - Lists chosen number of school events from now.\n'
+                   f'`{PREFIX}search [search_num] [*terms]` - Shows chosen number of results for search terms.\n'
                    f'`{PREFIX}resources` - Displays school resources with descriptions and hyperlinks.\n'
-                   f'`{PREFIX}add_class <subject_code> <course_num> <section_num>` - Adds a class to schedule.\n'
-                   f'`{PREFIX}remove_class <subject_code> <course_num> <section_num>` - Removes a class from schedule.\n'
+                   f'`{PREFIX}add_class [subject_code] [course_num] [section_num]` - Adds a class to schedule.\n'
+                   f'`{PREFIX}remove_class [subject_code] [course_num] [section_num]` - Removes a class from schedule.\n'
                    f'`{PREFIX}schedule` - Enumerates classes in schedule with credit information.\n'
-                   f'`{PREFIX}students <subject_code> <course_num>` - Finds the students taking a specified course.')
+                   f'`{PREFIX}students [subject_code] [course_num]` - Finds the students taking a specified course.\n'
+                   f'`{PREFIX}nom (open/all)` - Generates on-campus dining locations filtered by mode.')
+    footer = (f'[ ] = Required argument; '
+              f'( ) = Optional argument; '
+              f'* = Arbitrary number of arguments; '
+              f'val1/val2 = Options for valid arguments.')
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
+    embed.set_footer(text=footer)
     await ctx.send(embed=embed)
     return
 
