@@ -32,7 +32,6 @@ SQL_PASS = secret['SQL_PASS']
 DB_NAME = config['SQL_DB_NAME']
 USER_TBL_NAME = config['SQL_USER_TBL_NAME']
 COURSE_TBL_NAME = config['SQL_COURSE_TBL_NAME']
-WELC_CHNL_ID = config['WELC_CHANNEL_ID']
 
 # Checks DB for registration val lookup from discord_user_id (duid)
 async def is_registered(ctx, duid):
@@ -84,10 +83,24 @@ bot = commands.Bot(command_prefix=PREFIX, help_command=None, intents=intents)
 # Automatic welcome message for new member joins
 @bot.event
 async def on_member_join(member):
-    channel = bot.get_channel(WELC_CHNL_ID)
+    discord_guild_id = member.guild.id
 
-    await channel.send(f'Howdy, {member.mention}! Welcome to the **TAMU Class of 2026+** Discord server. To access the rest of the server, please introduce yourself with your name/nickname, major/school, and year.')
-    return
+    DISCORD_SVRS = config['DISCORD_SVRS']
+
+    if discord_guild_id == DISCORD_SVRS['TAMU_2026']['SVR_ID']:
+        WELC_CHNL_ID = DISCORD_SVRS['TAMU_2026']['WELC_CHNL_ID']
+        welc_channel = bot.get_channel(WELC_CHNL_ID)
+
+        await welc_channel.send(f'Howdy, {member.mention}! Welcome to the **TAMU Class of 2026+** Discord server. To access the rest of the server, please introduce yourself with your name/nickname, major/school, and year.')
+        return
+    elif discord_guild_id == DISCORD_SVRS['THE_COMMONS']['SVR_ID']:
+        WELC_CHNL_ID = DISCORD_SVRS['THE_COMMONS']['WELC_CHNL_ID']
+        ROLE_CHNL_ID = DISCORD_SVRS['THE_COMMONS']['ROLE_CHNL_ID']
+        welc_channel = bot.get_channel(WELC_CHNL_ID)
+        role_channel = bot.get_channel(ROLE_CHNL_ID)
+
+        await welc_channel.send(f'Howdy, {member.mention}! Head over to {role_channel.mention} to join a residence hall.')
+        return
 
 # Sends embed w/ list of commands (command syntax, arguments, + description)
 @bot.command()

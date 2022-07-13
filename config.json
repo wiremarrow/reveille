@@ -5,5 +5,15 @@
     "SQL_DB_NAME": "reveille",
     "SQL_USER_TBL_NAME": "users",
     "SQL_COURSE_TBL_NAME": "courses",
-    "WELC_CHANNEL_ID": 994843615589322805
+    "DISCORD_SVRS": {
+        "TAMU_2026": {
+            "SVR_ID": 992077492322041906,
+            "WELC_CHNL_ID": 994843615589322805
+        },
+        "THE_COMMONS": {
+            "SVR_ID": 996150114424991774,
+            "WELC_CHNL_ID": 996151055467429919,
+            "ROLE_CHNL_ID": 996150301042151434
+        }
+    }
 }
