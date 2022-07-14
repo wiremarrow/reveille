@@ -767,16 +767,32 @@ async def nom(ctx, mode='open'):
 
 # Returns the menu of a dining location with menu item information
 @bot.command()
-async def menu(ctx, mode='simple'):
+async def menu(ctx, kind='breakfast', mode='simple'):
     now = arrow.utcnow().to('US/Central')
     fnow = now.format('YYYY-M-D')
 
-    search_url = f'https://api.dineoncampus.com/v1/location/59972586ee596fe55d2eef75/periods?platform=0&date={fnow}'
-    json_str = requests.get(search_url).content
+    search_url1 = f'https://api.dineoncampus.com/v1/location/59972586ee596fe55d2eef75/periods?platform=0&date={fnow}'
+    json_str1 = requests.get(search_url1).content
 
-    hall = json.loads(json_str)
-    menu = hall['menu']
-    periods_info = hall['periods']
+    period_json = json.loads(json_str1)
+    periods_info = period_json['periods']
+
+    period = None
+
+    if kind == 'breakfast':
+        period = periods_info[0]['id']
+    elif kind == 'lunch':
+        period = periods_info[1]['id']
+    elif kind == 'dinner':
+        period = periods_info[2]['id']
+    else:
+        await ctx.send(f'Invalid command argument.')
+
+    search_url2 = f'https://api.dineoncampus.com/v1/location/59972586ee596fe55d2eef75/periods/{period}?platform=0&date={fnow}'
+    json_str2 = requests.get(search_url2).content
+
+    menu_json = json.loads(json_str2)
+    menu = menu_json['menu']
     periods = menu['periods']
     categories = periods['categories']
 
