@@ -14,14 +14,17 @@ from bs4 import BeautifulSoup
 c = open('config.json')
 s = open('secret.json')
 ss = open('subjects.json')
+p = open('places.json')
 
 config = json.load(c)
 secret = json.load(s)
 subjects = json.load(ss)
+places = json.load(p)
 
 c.close()
 s.close()
 ss.close()
+p.close()
 
 PREFIX = config['BOT_COMMAND_PREFIX']
 TOKEN = secret['BOT_TOKEN']
@@ -694,19 +697,6 @@ async def nom(ctx, mode='open'):
     vendors = []
 
     for location in locations:
-        # is_active = location['active']
-        # info = location['week'][day_num]
-        # takes_apple_pay = location['pay_with_apple_pay']
-        # takes_cash = location['pay_with_cash']
-        # takes_cc = location['pay_with_cc']
-        # takes_dining_dollars = location['pay_with_dining_dollars']
-        # takes_google_pay = location['pay_with_google_pay']
-        # takes_meal_exchange = location['pay_with_meal_exchange']
-        # takes_meal_trade = location['pay_with_meal_trade']
-        # takes_meal_swipe = location['pay_with_meal_swipe']
-        # takes_retail_swipe = location['pay_with_retail_swipe']
-        # takes_samsung_pay = location['pay_with_samsung_pay']
-        # takes_meal_plan = location['pay_with_meal_plan']
         name = location['name']
 
         day_info = [x for x in location['week'] if x['day'] == day_num][0]
@@ -765,10 +755,11 @@ async def nom(ctx, mode='open'):
         return
     else:
         await ctx.send('Invalid command argument.')
+        return
 
 # Returns the menu of a dining location with menu item information
 @bot.command()
-async def menu(ctx, kind='breakfast', mode='simple'):
+async def menu(ctx, kind='BREAKFAST', mode='SIMPLE'):
     now = arrow.utcnow().to('US/Central')
     fnow = now.format('YYYY-M-D')
 
@@ -780,14 +771,18 @@ async def menu(ctx, kind='breakfast', mode='simple'):
 
     period = None
 
-    if kind == 'breakfast':
+    if kind.upper() == 'BREAKFAST':
         period = periods_info[0]['id']
-    elif kind == 'lunch':
+        await ctx.send(f'__**The Commons Dining Hall Breakfast Menus**__ ({now.format("M/D @ h:mm a")})')
+    elif kind.upper() == 'LUNCH':
         period = periods_info[1]['id']
-    elif kind == 'dinner':
+        await ctx.send(f'__**The Commons Dining Hall Lunch Menus**__ ({now.format("M/D @ h:mm a")})')
+    elif kind.upper() == 'DINNER':
         period = periods_info[2]['id']
+        await ctx.send(f'__**The Commons Dining Hall Dinner Menus**__ ({now.format("M/D @ h:mm a")})')
     else:
         await ctx.send(f'Invalid command argument.')
+        return
 
     search_url2 = f'https://api.dineoncampus.com/v1/location/59972586ee596fe55d2eef75/periods/{period}?platform=0&date={fnow}'
     json_str2 = requests.get(search_url2).content
@@ -796,8 +791,6 @@ async def menu(ctx, kind='breakfast', mode='simple'):
     menu = menu_json['menu']
     periods = menu['periods']
     categories = periods['categories']
-
-    await ctx.send(f'__**The Commons Dining Hall Menus**__ ({now.format("M/D @ h:mm a")})')
 
     for category in categories:
         desc_str = ''
@@ -823,10 +816,13 @@ async def menu(ctx, kind='breakfast', mode='simple'):
 
             desc_part = f'__Description:__ {desc}\n' if desc is not None else ''
 
-            if mode == 'simple':
+            if mode.upper() == 'SIMPLE':
                 item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]'
-            elif mode == 'detailed':
+            elif mode.upper() == 'DETAILED':
                 item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]\nCarbs: {carbs}{carbs_uom}; Protein: {proteins}{proteins_uom}; Fats: {fats}{fats_uom}\n{desc_part}__Ingredients:__ {ingredients}'
+            else:
+                await ctx.send('Invalid command argument.')
+                return
 
             desc_str = f'{desc_str}\n{item_str}'
 
@@ -836,6 +832,81 @@ async def menu(ctx, kind='breakfast', mode='simple'):
         embed = discord.Embed(title=title, description=description, color=color)
 
         await ctx.send(embed=embed)
+    return
+
+# Gives a list of dining places w/ id nums categorized by a mode
+@bot.command()
+async def dining(ctx, mode='HALL'):
+    search_url = 'https://api.dineoncampus.com/v1/locations/all_locations?platform=0&site_id=5751fd4290975b60e0489534&for_menus=true&with_address=false&with_buildings=true'
+    json_str = requests.get(search_url).content
+
+    location_json = json.loads(json_str)
+    buildings = location_json['buildings']
+
+    index = 1
+
+    for building in buildings:
+        building_str = ''
+
+        name = building['name']
+        locations = building['locations']
+
+        for location in locations:
+            if mode.upper() == 'HALL' and name != 'Dining Halls (All-You-Care-To-Eat)':
+                index = index + 1
+                continue
+            elif mode.upper() == 'NORTH' and name != 'North Campus':
+                index = index + 1
+                continue
+            elif mode.upper() == 'SOUTH' and name != 'South Campus':
+                index = index + 1
+                continue
+            elif mode.upper() == 'CENTRAL' and name != 'Central Campus':
+                index = index + 1
+                continue
+            elif mode.upper() == 'WEST' and name != 'West Campus':
+                index = index + 1
+                continue
+            elif mode.upper() == 'EAST' and name != 'East Campus':
+                index = index + 1
+                continue
+            elif mode.upper() == 'ALL':
+                pass
+            else:
+                if mode.upper() != 'HALL' and mode.upper() != 'NORTH' and mode.upper() != 'SOUTH' and mode.upper() != 'CENTRAL' and mode.upper() != 'WEST' and mode.upper() != 'EAST':
+                    await ctx.send('Invalid command argument.')
+                    return
+
+            loc_name = location['name']
+            # id = location['id']
+            # building_id = location['building_id']
+            # active = location['active']
+            # desc = location['short_description']
+            # pay_with_apple_pay = location['pay_with_apple_pay']
+            # pay_with_cash = location['pay_with_cash']
+            # pay_with_cc = location['pay_with_cc']
+            # pay_with_dining_dollars = location['pay_with_dining_dollars']
+            # pay_with_google_pay = location['pay_with_google_pay']
+            # pay_with_meal_exchange = location['pay_with_meal_exchange']
+            # pay_with_meal_swipe = location['pay_with_meal_swipe']
+            # pay_with_meal_trade = location['pay_with_meal_trade']
+            # pay_with_retail_swipe = location['pay_with_retail_swipe']
+            # pay_with_samsung_pay = location['pay_with_samsung_pay']
+            # pay_with_meal_plan = location['pay_with_meal_plan']
+
+            building_str = f'{building_str}\n`{index}` {loc_name}'
+
+            index = index + 1
+
+        building_str = building_str.strip()
+
+        if building_str != '':
+            title = f'__{name}__'
+            description = building_str
+            color = 0x500000
+
+            embed = discord.Embed(title=title, description=description, color=color)
+            await ctx.send(embed=embed)
     return
 
 bot.run(TOKEN)
