@@ -105,7 +105,7 @@ async def on_member_join(member):
 # Sends embed w/ list of commands (command syntax, arguments, + description)
 @bot.command()
 async def help(ctx):
-    title = 'Command Help Menu'
+    title = '__Command Help Menu__'
     description = (f'`{PREFIX}help` - Produces a help menu for command descriptions and syntax.\n'
                    f'`{PREFIX}register [net_id]` - Register your NetID with the bot to verify yourself.\n'
                    f'`{PREFIX}verify [verif_code]` - Verifies user if correct verification code is passed.\n'
@@ -118,7 +118,8 @@ async def help(ctx):
                    f'`{PREFIX}remove_class [subject_code] [course_num] [section_num]` - Removes a class from schedule.\n'
                    f'`{PREFIX}schedule` - Enumerates classes in schedule with credit information.\n'
                    f'`{PREFIX}students [subject_code] [course_num]` - Finds the students taking a specified course.\n'
-                   f'`{PREFIX}nom (open/all)` - Generates on-campus dining locations filtered by mode.')
+                   f'`{PREFIX}nom (open/all)` - Generates on-campus dining locations filtered by mode.\n'
+                   f'`{PREFIX}menu (breakfast/lunch/dinner) (simple/detailed)` - Lists the dining menus for a specified dining location.')
     footer = (f'[ ] = Required argument; '
               f'( ) = Optional argument; '
               f'* = Arbitrary number of arguments; '
@@ -829,7 +830,7 @@ async def menu(ctx, kind='breakfast', mode='simple'):
 
             desc_str = f'{desc_str}\n{item_str}'
 
-        title = f'__{name} Menu__'
+        title = f'__{name}\'s Menu__'
         description = desc_str.strip()
         color = 0x500000
         embed = discord.Embed(title=title, description=description, color=color)
