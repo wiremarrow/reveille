@@ -745,16 +745,21 @@ async def nom(ctx, mode='open'):
                 vendors.append(f'- {name} [DAY CLOSED]')
 
     if mode == 'open':
+        if not vendors:
+            await ctx.send('Nothing is open!')
+            await ctx.send(':sob:')
+            return
+
         description = '\n'.join(vendors)
 
-        await ctx.send(f'__**Open Campus Dining Options**__ ({now.format("MM/DD @ h:mm a")})\n```diff\n{description}\n```')
+        await ctx.send(f'__**Open Campus Dining Options**__ ({now.format("M/D @ h:mm a")})\n```diff\n{description}\n```')
         return
     elif mode == 'all':
-        curated_vendors = vendors[1:53]
+        curated_vendors = vendors[1:52]
         description1 = '\n'.join(curated_vendors[:len(curated_vendors)//2]).strip()
         description2 = '\n'.join(curated_vendors[len(curated_vendors)//2:]).strip()
 
-        await ctx.send(f'__**All Campus Dining Options**__ ({now.format("MM/DD @ h:mm a")})\n```diff\n{description1}\n```')
+        await ctx.send(f'__**All Campus Dining Options**__ ({now.format("M/D @ h:mm a")})\n```diff\n{description1}\n```')
         await ctx.send(f'```diff\n{description2}\n```')
         return
     else:
@@ -775,7 +780,7 @@ async def menu(ctx, mode='simple'):
     periods = menu['periods']
     categories = periods['categories']
 
-    await ctx.send('__**The Commons Dining Hall Menus**__')
+    await ctx.send(f'__**The Commons Dining Hall Menus**__ ({now.format("M/D @ h:mm a")})')
 
     for category in categories:
         desc_str = ''
@@ -789,17 +794,22 @@ async def menu(ctx, mode='simple'):
             item_name = items[i]['name']
             desc = items[i]['desc']
             portion = items[i]['portion']
-            ingredients = items[i]['ingredients']
+            ingredients = items[i]['ingredients'].replace('*Menu More', '')
             nutrients = items[i]['nutrients']
-            calories = nutrients[0]['value']
-            proteins = nutrients[1]['value']
-            carbs = nutrients[2]['value']
-            fats = nutrients[4]['value']
+            calories = nutrients[0]['value'].replace('less than 1 gram', '<1')
+            proteins_uom = nutrients[1]['uom']
+            proteins = nutrients[1]['value'].replace('less than 1 gram', '<1')
+            carbs_uom = nutrients[2]['uom']
+            carbs = nutrients[2]['value'].replace('less than 1 gram', '<1')
+            fats_uom = nutrients[4]['uom']
+            fats = nutrients[4]['value'].replace('less than 1 gram', '<1')
+
+            desc_part = f'__Description:__ {desc}\n' if desc is not None else ''
 
             if mode == 'simple':
                 item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]'
             elif mode == 'detailed':
-                item_str = f'`{i+1}` **{item_name}** ({portion})\n{desc}; {ingredients}\nCarbs: {carbs}, Protein: {proteins}, Fats: {fats}'
+                item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]\nCarbs: {carbs}{carbs_uom}; Protein: {proteins}{proteins_uom}; Fats: {fats}{fats_uom}\n{desc_part}__Ingredients:__ {ingredients}'
 
             desc_str = f'{desc_str}\n{item_str}'
 
