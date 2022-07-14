@@ -747,17 +747,68 @@ async def nom(ctx, mode='open'):
     if mode == 'open':
         description = '\n'.join(vendors)
 
-        await ctx.send(f'**Open Campus Dining Options** ({now.format("MM/DD @ h:mm a")})\n```diff\n{description}\n```')
+        await ctx.send(f'__**Open Campus Dining Options**__ ({now.format("MM/DD @ h:mm a")})\n```diff\n{description}\n```')
         return
     elif mode == 'all':
         curated_vendors = vendors[1:53]
         description1 = '\n'.join(curated_vendors[:len(curated_vendors)//2]).strip()
         description2 = '\n'.join(curated_vendors[len(curated_vendors)//2:]).strip()
 
-        await ctx.send(f'**All Campus Dining Options** ({now.format("MM/DD @ h:mm a")})\n```diff\n{description1}\n```')
+        await ctx.send(f'__**All Campus Dining Options**__ ({now.format("MM/DD @ h:mm a")})\n```diff\n{description1}\n```')
         await ctx.send(f'```diff\n{description2}\n```')
         return
     else:
         await ctx.send('Invalid command argument.')
+
+# Returns the menu of a dining location with menu item information
+@bot.command()
+async def menu(ctx, mode='simple'):
+    now = arrow.utcnow().to('US/Central')
+    fnow = now.format('YYYY-M-D')
+
+    search_url = f'https://api.dineoncampus.com/v1/location/59972586ee596fe55d2eef75/periods?platform=0&date={fnow}'
+    json_str = requests.get(search_url).content
+
+    hall = json.loads(json_str)
+    menu = hall['menu']
+    periods_info = hall['periods']
+    periods = menu['periods']
+    categories = periods['categories']
+
+    await ctx.send('__**The Commons Dining Hall Menus**__')
+
+    for category in categories:
+        desc_str = ''
+
+        name = category['name']
+        items = category['items']
+
+        for i in range(len(items)):
+            item_str = ''
+
+            item_name = items[i]['name']
+            desc = items[i]['desc']
+            portion = items[i]['portion']
+            ingredients = items[i]['ingredients']
+            nutrients = items[i]['nutrients']
+            calories = nutrients[0]['value']
+            proteins = nutrients[1]['value']
+            carbs = nutrients[2]['value']
+            fats = nutrients[4]['value']
+
+            if mode == 'simple':
+                item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]'
+            elif mode == 'detailed':
+                item_str = f'`{i+1}` **{item_name}** ({portion})\n{desc}; {ingredients}\nCarbs: {carbs}, Protein: {proteins}, Fats: {fats}'
+
+            desc_str = f'{desc_str}\n{item_str}'
+
+        title = f'__{name} Menu__'
+        description = desc_str.strip()
+        color = 0x500000
+        embed = discord.Embed(title=title, description=description, color=color)
+
+        await ctx.send(embed=embed)
+    return
 
 bot.run(TOKEN)
