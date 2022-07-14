@@ -759,11 +759,13 @@ async def nom(ctx, mode='open'):
 
 # Returns the menu of a dining location with menu item information
 @bot.command()
-async def menu(ctx, kind='BREAKFAST', mode='SIMPLE'):
+async def menu(ctx, place, kind='BREAKFAST', mode='SIMPLE'):
     now = arrow.utcnow().to('US/Central')
     fnow = now.format('YYYY-M-D')
 
-    search_url1 = f'https://api.dineoncampus.com/v1/location/59972586ee596fe55d2eef75/periods?platform=0&date={fnow}'
+    id = places[str(place)]
+
+    search_url1 = f'https://api.dineoncampus.com/v1/location/{id}/periods?platform=0&date={fnow}'
     json_str1 = requests.get(search_url1).content
 
     period_json = json.loads(json_str1)
