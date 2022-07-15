@@ -757,13 +757,14 @@ async def nom(ctx, mode='open'):
         await ctx.send('Invalid command argument.')
         return
 
-# Returns the menu of a dining location with menu item information
+# Returns the menu of a dining place with menu item information
 @bot.command()
 async def menu(ctx, place, kind='BREAKFAST', mode='SIMPLE'):
     now = arrow.utcnow().to('US/Central')
     fnow = now.format('YYYY-M-D')
 
-    id = places[str(place)]
+    id = places[str(place)][0]
+    place_name = places[str(place)][1]
 
     search_url1 = f'https://api.dineoncampus.com/v1/location/{id}/periods?platform=0&date={fnow}'
     json_str1 = requests.get(search_url1).content
@@ -773,20 +774,20 @@ async def menu(ctx, place, kind='BREAKFAST', mode='SIMPLE'):
 
     period = None
 
-    if kind.upper() == 'BREAKFAST':
+    if kind.upper() == 'BREAKFAST' or kind.upper() == 'GENERAL':
         period = periods_info[0]['id']
-        await ctx.send(f'__**The Commons Dining Hall Breakfast Menus**__ ({now.format("M/D @ h:mm a")})')
+        await ctx.send(f'__**{place_name} Breakfast Menus**__ ({now.format("M/D @ h:mm a")})')
     elif kind.upper() == 'LUNCH':
         period = periods_info[1]['id']
-        await ctx.send(f'__**The Commons Dining Hall Lunch Menus**__ ({now.format("M/D @ h:mm a")})')
+        await ctx.send(f'__**{place_name} Lunch Menus**__ ({now.format("M/D @ h:mm a")})')
     elif kind.upper() == 'DINNER':
         period = periods_info[2]['id']
-        await ctx.send(f'__**The Commons Dining Hall Dinner Menus**__ ({now.format("M/D @ h:mm a")})')
+        await ctx.send(f'__**{place_name} Dinner Menus**__ ({now.format("M/D @ h:mm a")})')
     else:
         await ctx.send(f'Invalid command argument.')
         return
 
-    search_url2 = f'https://api.dineoncampus.com/v1/location/59972586ee596fe55d2eef75/periods/{period}?platform=0&date={fnow}'
+    search_url2 = f'https://api.dineoncampus.com/v1/location/{id}/periods/{period}?platform=0&date={fnow}'
     json_str2 = requests.get(search_url2).content
 
     menu_json = json.loads(json_str2)
@@ -795,7 +796,7 @@ async def menu(ctx, place, kind='BREAKFAST', mode='SIMPLE'):
     categories = periods['categories']
 
     for category in categories:
-        desc_str = ''
+        desc_strs = []
 
         name = category['name']
         items = category['items']
@@ -806,34 +807,82 @@ async def menu(ctx, place, kind='BREAKFAST', mode='SIMPLE'):
             item_name = items[i]['name']
             desc = items[i]['desc']
             portion = items[i]['portion']
-            ingredients = items[i]['ingredients'].replace('*Menu More', '')
+            ingredients = None
+
+            try:
+                ingredients = items[i]['ingredients'].replace('*Menu More', '')
+            except:
+                pass
+
             nutrients = items[i]['nutrients']
-            calories = nutrients[0]['value'].replace('less than 1 gram', '<1')
-            proteins_uom = nutrients[1]['uom']
-            proteins = nutrients[1]['value'].replace('less than 1 gram', '<1')
-            carbs_uom = nutrients[2]['uom']
-            carbs = nutrients[2]['value'].replace('less than 1 gram', '<1')
-            fats_uom = nutrients[4]['uom']
-            fats = nutrients[4]['value'].replace('less than 1 gram', '<1')
+            calories = str(nutrients[0]['value']).replace('less than 1 gram', '<1')
+            proteins_uom = None
+
+            try:
+                proteins_uom = nutrients[1]['uom']
+            except:
+                pass
+            if proteins_uom is None:
+                proteins_uom = 'cal'
+
+            proteins = str(nutrients[1]['value']).replace('less than 1 gram', '<1')
+            carbs_uom = None
+
+            try:
+                carbs_uom = nutrients[2]['uom']
+            except:
+                pass
+            if carbs_uom is None:
+                carbs_uom = 'cal'
+
+            carbs = str(nutrients[2]['value']).replace('less than 1 gram', '<1')
+            fats_uom = None
+
+            try:
+                fats_uom = nutrients[4]['uom']
+            except:
+                pass
+            if fats_uom is None:
+                fats_uom = 'cal'
+
+            fats = str(nutrients[4]['value']).replace('less than 1 gram', '<1')
 
             desc_part = f'__Description:__ {desc}\n' if desc is not None else ''
+            ingredients_part = f'__Ingredients__ {ingredients}\n' if ingredients is not None else ''
 
             if mode.upper() == 'SIMPLE':
                 item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]'
             elif mode.upper() == 'DETAILED':
-                item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]\nCarbs: {carbs}{carbs_uom}; Protein: {proteins}{proteins_uom}; Fats: {fats}{fats_uom}\n{desc_part}__Ingredients:__ {ingredients}'
+                item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]\n{desc_part}{ingredients_part}'
             else:
                 await ctx.send('Invalid command argument.')
                 return
 
-            desc_str = f'{desc_str}\n{item_str}'
+            desc_strs.append(item_str)
 
-        title = f'__{name}\'s Menu__'
-        description = desc_str.strip()
-        color = 0x500000
-        embed = discord.Embed(title=title, description=description, color=color)
+        total_len = 0
+        last_index_stop = 0
 
-        await ctx.send(embed=embed)
+        for i in range(len(desc_strs)):
+            desc_str = desc_strs[i]
+            if total_len + len(desc_str) >= 3800:
+                title = f'__{name} Menu__'
+                description = '\n'.join(desc_strs[last_index_stop:i]).strip()
+                color = 0x500000
+
+                embed = discord.Embed(title=title, description=description, color=color)
+                await ctx.send(embed=embed)
+
+                total_len = 0
+                last_index_stop = i
+            elif i == len(desc_strs) - 1:
+                title = f'__{name} Menu__'
+                description = '\n'.join(desc_strs[last_index_stop:i]).strip()
+                color = 0x500000
+
+                embed = discord.Embed(title=title, description=description, color=color)
+                await ctx.send(embed=embed)
+            total_len += len(desc_str)
     return
 
 # Gives a list of dining places w/ id nums categorized by a mode
