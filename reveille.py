@@ -816,36 +816,6 @@ async def menu(ctx, place, kind='BREAKFAST', mode='SIMPLE'):
 
             nutrients = items[i]['nutrients']
             calories = str(nutrients[0]['value']).replace('less than 1 gram', '<1')
-            proteins_uom = None
-
-            try:
-                proteins_uom = nutrients[1]['uom']
-            except:
-                pass
-            if proteins_uom is None:
-                proteins_uom = 'cal'
-
-            proteins = str(nutrients[1]['value']).replace('less than 1 gram', '<1')
-            carbs_uom = None
-
-            try:
-                carbs_uom = nutrients[2]['uom']
-            except:
-                pass
-            if carbs_uom is None:
-                carbs_uom = 'cal'
-
-            carbs = str(nutrients[2]['value']).replace('less than 1 gram', '<1')
-            fats_uom = None
-
-            try:
-                fats_uom = nutrients[4]['uom']
-            except:
-                pass
-            if fats_uom is None:
-                fats_uom = 'cal'
-
-            fats = str(nutrients[4]['value']).replace('less than 1 gram', '<1')
 
             desc_part = f'__Description:__ {desc}\n' if desc is not None else ''
             ingredients_part = f'__Ingredients__ {ingredients}\n' if ingredients is not None else ''
