@@ -122,7 +122,8 @@ async def help(ctx):
                    f'`{PREFIX}schedule` - Enumerates classes in schedule with credit information.\n'
                    f'`{PREFIX}students [subject_code] [course_num]` - Finds the students taking a specified course.\n'
                    f'`{PREFIX}nom (open/all)` - Generates on-campus dining locations filtered by mode.\n'
-                   f'`{PREFIX}menu (breakfast/lunch/dinner) (simple/detailed)` - Lists the dining menus for a specified dining location.')
+                   f'`{PREFIX}menu [place_id] (general/breakfast/lunch/dinner) (simple/detailed)` - Lists the dining menus for a specified dining location and menu type.\n'
+                   f'`{PREFIX}dining (hall/north/south/central/west/east/all)` - Enumerates the `place id`s for dining locations in a specified area.')
     footer = (f'[ ] = Required argument; '
               f'( ) = Optional argument; '
               f'* = Arbitrary number of arguments; '
@@ -759,7 +760,7 @@ async def nom(ctx, mode='open'):
 
 # Returns the menu of a dining place with menu item information
 @bot.command()
-async def menu(ctx, place, kind='BREAKFAST', mode='SIMPLE'):
+async def menu(ctx, place, kind='GENERAL', mode='SIMPLE'):
     now = arrow.utcnow().to('US/Central')
     fnow = now.format('YYYY-M-D')
 
