@@ -931,4 +931,11 @@ async def dining(ctx, mode='HALL'):
             await ctx.send(embed=embed)
     return
 
+# Sends a Gig 'em message
+@bot.command()
+async def gigem(ctx):
+
+    await ctx.send('Gig \'em, Aggies!')
+    return
+
 bot.run(TOKEN)
