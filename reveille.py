@@ -976,17 +976,31 @@ async def events(ctx, days='TODAY'):
         image_src = event['image_src']
         summary = event['summary']
         href = event['href']
+        ts_start = event['ts_start']
 
-        event_url = f'https://calendar.tamu.edu/{href}'
+        start = arrow.get(ts_start).to('US/Central')
+
+        url = f'https://calendar.tamu.edu/{href}'
+        event_id = int(re.search(r'\d+', href.split('-')[0]).group())
+        print(event_id)
+
+        event_search_url = f'https://calendar.tamu.edu/live/calendar/view/event/event_id/{event_id}?user_tz=America%2FChicago&template_vars=group,title,date_time,add_to_google,add_to_yahoo,ical_download_href,repeats,until,location,custom_room_number,summary,description,contact_info,related_content,cost,registration,tags_calendar,id,image,online_url,online_button_label,online_instructions,share_links&syntax=%3Cwidget%20type%3D%22events_calendar%22%3E%3Carg%20id%3D%22mini_cal_heat_map%22%3Efalse%3C%2Farg%3E%3Carg%20id%3D%22thumb_width%22%3E363%3C%2Farg%3E%3Carg%20id%3D%22thumb_height%22%3E220%3C%2Farg%3E%3Carg%20id%3D%22hide_repeats%22%3Efalse%3C%2Farg%3E%3Carg%20id%3D%22enable_home_view%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22search_all_events_only%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_groups%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_tags%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_locations%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22use_modular_templates%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22default_view%22%3Ehome%3C%2Farg%3E%3Carg%20id%3D%22group%22%3E%2A%20Main%20University%20Calendar%3C%2Farg%3E%3C%2Fwidget%3E'
+        event_json = requests.get(event_search_url).content
+
+        event_detail = json.loads(event_json)
+        print(event_detail)
+        date = event_detail['event']['date'].replace(' CDT', '')
 
         title = name
         description = f'**Location:** {location}\n**Description:** {summary}'
         # parser = Parser()
         # parser.feed(description)
         color = 0x500000
+        footer = f'{start.format("M/D @ h:mm a")}'
 
-        embed = discord.Embed(title=title, description=description, color=color, url=event_url)
+        embed = discord.Embed(title=title, description=description, color=color, url=url)
         embed.set_image(url=image_src)
+        embed.set_footer(text=date)
 
         await ctx.send(embed=embed)
 
