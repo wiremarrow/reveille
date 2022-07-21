@@ -1,3 +1,4 @@
+from dis import disco
 import discord
 from discord.ext import commands
 import re
@@ -9,6 +10,7 @@ import requests
 import mysql.connector
 from ics import Calendar
 from bs4 import BeautifulSoup
+from html.parser import HTMLParser
 
 # Initialize config/secret vars
 c = open('config.json')
@@ -114,7 +116,7 @@ async def help(ctx):
                    f'`{PREFIX}verify [verif_code]` - Verifies user if correct verification code is passed.\n'
                    f'`{PREFIX}is_verified [@user]` - Checks if a user has verified their NetID.\n'
                    f'`{PREFIX}course [subject_code] [course_num]` - Returns info about a specified course.\n'
-                   f'`{PREFIX}calendar (event_num)` - Lists chosen number of school events from now.\n'
+                   f'`{PREFIX}calendar (event_num)` - Lists chosen number of academic events from now.\n'
                    f'`{PREFIX}search [search_num] [*terms]` - Shows chosen number of results for search terms.\n'
                    f'`{PREFIX}resources` - Displays school resources with descriptions and hyperlinks.\n'
                    f'`{PREFIX}add_class [subject_code] [course_num] [section_num]` - Adds a class to schedule.\n'
@@ -938,5 +940,54 @@ async def gigem(ctx):
 
     await ctx.send('Gig \'em, Aggies!')
     return
+
+# Sends school events in discord from TAMU calendar
+@bot.command()
+async def events(ctx, days='TODAY'):
+    # class Parser(HTMLParser):
+    #     def handle_starttag(self, tag, attrs):
+    #         if tag == '':
+    #             return
+    #     def handle_endtag(self, tag):
+    #         if tag == '':
+    #             return
+
+    now = arrow.utcnow().to('US/Central')
+
+    search_url = r'https://calendar.tamu.edu/live/calendar/view/day/audience/Students?user_tz=America%2FChicago&template_vars=id,href,image_src,title_link,date_title,time,latitude,longitude,location,summary&syntax=%3Cwidget%20type%3D%22events_calendar%22%3E%3Carg%20id%3D%22mini_cal_heat_map%22%3Efalse%3C%2Farg%3E%3Carg%20id%3D%22thumb_width%22%3E363%3C%2Farg%3E%3Carg%20id%3D%22thumb_height%22%3E220%3C%2Farg%3E%3Carg%20id%3D%22hide_repeats%22%3Efalse%3C%2Farg%3E%3Carg%20id%3D%22enable_home_view%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22search_all_events_only%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_groups%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_tags%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_locations%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22use_modular_templates%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22default_view%22%3Ehome%3C%2Farg%3E%3Carg%20id%3D%22group%22%3E%2A%20Main%20University%20Calendar%3C%2Farg%3E%3C%2Fwidget%3E'
+    json_str = requests.get(search_url).content
+
+    events_json = json.loads(json_str)
+    events = events_json['events']
+    print(events)
+
+    if days.upper() == 'TODAY':
+        await ctx.send(f'__**School Events for Today**__ ({now.format("M/D")})')
+    elif days.upper() == 'TOMORROW':
+        await ctx.send(f'__**School Events for Tomorrow**__ ({now.shift(days=1).format("M/D")})')
+    else:
+        await ctx.send('Invalid command argument.')
+        return
+
+    for event in events:
+        print(event)
+        name = event['title'].replace('&amp;', '&')
+        location = event['location'].replace('&amp;', '&')
+        image_src = event['image_src']
+        summary = event['summary']
+        href = event['href']
+
+        event_url = f'https://calendar.tamu.edu/{href}'
+
+        title = name
+        description = f'**Location:** {location}\n**Description:** {summary}'
+        # parser = Parser()
+        # parser.feed(description)
+        color = 0x500000
+
+        embed = discord.Embed(title=title, description=description, color=color, url=event_url)
+        embed.set_image(url=image_src)
+
+        await ctx.send(embed=embed)
 
 bot.run(TOKEN)
