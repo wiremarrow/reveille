@@ -937,7 +937,6 @@ async def dining(ctx, mode='HALL'):
 # Sends a Gig 'em message
 @bot.command()
 async def gigem(ctx):
-
     await ctx.send('Gig \'em, Aggies!')
     return
 
@@ -949,12 +948,13 @@ async def events(ctx, days='TODAY'):
     if days.upper() == 'TODAY':
         await ctx.send(f'__**School Events for Today**__ ({now.format("M/D")})')
     elif days.upper() == 'TOMORROW':
-        await ctx.send(f'__**School Events for Tomorrow**__ ({now.shift(days=1).format("M/D")})')
+        now = now.shift(days=1)
+        await ctx.send(f'__**School Events for Tomorrow**__ ({now.format("M/D")})')
     else:
         await ctx.send('Invalid command argument.')
         return
 
-    search_url = r'https://calendar.tamu.edu/live/calendar/view/day/audience/Students?user_tz=America%2FChicago&template_vars=id,href,image_src,title_link,date_title,time,latitude,longitude,location,summary&syntax=%3Cwidget%20type%3D%22events_calendar%22%3E%3Carg%20id%3D%22mini_cal_heat_map%22%3Efalse%3C%2Farg%3E%3Carg%20id%3D%22thumb_width%22%3E363%3C%2Farg%3E%3Carg%20id%3D%22thumb_height%22%3E220%3C%2Farg%3E%3Carg%20id%3D%22hide_repeats%22%3Efalse%3C%2Farg%3E%3Carg%20id%3D%22enable_home_view%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22search_all_events_only%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_groups%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_tags%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_locations%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22use_modular_templates%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22default_view%22%3Ehome%3C%2Farg%3E%3Carg%20id%3D%22group%22%3E%2A%20Main%20University%20Calendar%3C%2Farg%3E%3C%2Fwidget%3E'
+    search_url = f'https://calendar.tamu.edu/live/calendar/view/day/audience/Students/date/{now.format("YYYYMMDD")}?user_tz=America%2FChicago&template_vars=id,href,image_src,title_link,date_title,time,latitude,longitude,location,summary&syntax=%3Cwidget%20type%3D%22events_calendar%22%3E%3Carg%20id%3D%22mini_cal_heat_map%22%3Efalse%3C%2Farg%3E%3Carg%20id%3D%22thumb_width%22%3E363%3C%2Farg%3E%3Carg%20id%3D%22thumb_height%22%3E220%3C%2Farg%3E%3Carg%20id%3D%22hide_repeats%22%3Efalse%3C%2Farg%3E%3Carg%20id%3D%22enable_home_view%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22search_all_events_only%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_groups%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_tags%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22show_locations%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22use_modular_templates%22%3Etrue%3C%2Farg%3E%3Carg%20id%3D%22default_view%22%3Ehome%3C%2Farg%3E%3Carg%20id%3D%22group%22%3E%2A%20Main%20University%20Calendar%3C%2Farg%3E%3C%2Fwidget%3E'
     json_str = requests.get(search_url).content
 
     events_json = json.loads(json_str)
