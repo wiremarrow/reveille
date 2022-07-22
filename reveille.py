@@ -1,4 +1,5 @@
 from dis import disco
+from pydoc import Helper
 import discord
 from discord.ext import commands
 import re
@@ -999,6 +1000,77 @@ async def events(ctx, days='TODAY'):
         embed.set_footer(text=footer)
 
         await ctx.send(embed=embed)
+    return
+
+# Reports weather conditions given a specified step mode.
+@bot.command()
+async def weather(ctx, mode='HOURLY', val=1):
+    now = arrow.utcnow().to('US/Central')
+
+    lat = round(30.618057377264176, 4)
+    lon = round(-96.33628848619472, 4)
+
+    search_url = f'https://api.weather.gov/points/{lat},{lon}'
+    json_str1 = requests.get(search_url).content
+    weather_json = json.loads(json_str1)
+
+    properties1 = weather_json['properties']
+    forecast_url = properties1['forecast']
+
+    if mode.upper() == 'HOURLY':
+        forecast_url += '/hourly'
+    elif mode.upper() == 'BIDAILY':
+        pass
+    else:
+        await ctx.send('Invalid command argument.')
+        return
+
+    json_str2 = requests.get(forecast_url).content
+    forecast_json = json.loads(json_str2)
+
+    properties2 = forecast_json['properties']
+    periods = properties2['periods']
+
+    for period in periods:
+        number = period['number']
+        name = period['name']
+        start = arrow.get(period['startTime'])
+        end = arrow.get(period['endTime'])
+        temp = period['temperature']
+        temp_unit = period['temperatureUnit']
+        wind_speed = period['windSpeed']
+        wind_dir = period['windDirection']
+        icon_url = period['icon']
+        short_forecast = period['shortForecast'].replace('. ', '.\n')
+        detailed_forecast = period['detailedForecast'].replace('. ', '.\n')
+
+        if mode.upper() == 'HOURLY' and number == int(val):
+            title = '__Weather at TAMU Campus__'
+            if int(val) == 1:
+                description = f'{start.format("M/D h:mma")} - {end.format("M/D h:mma")}\n\n**Time Period:** Now\n**Temperature:** {temp} °{temp_unit}\n**Wind Speed:** {wind_speed} {wind_dir}\n**Forecast:** {short_forecast}'
+            else:
+                description = f'{start.format("M/D h:mma")} - {end.format("M/D h:mma")}\n\n**Time Period:** {start.format("dddd")}\n**Temperature:** {temp} °{temp_unit}\n**Wind Speed:** {wind_speed} {wind_dir}\n**Forecast:** {short_forecast}'
+            color = 0x500000
+            footer = 'Accuracy: Hourly'
+
+            embed = discord.Embed(title=title, description=description, color=color)
+            embed.set_thumbnail(url=icon_url)
+            embed.set_footer(text=footer)
+
+            await ctx.send(embed=embed)
+            return
+        elif mode.upper() == 'BIDAILY' and number == int(val):
+            title = '__Weather at TAMU Campus__'
+            description = f'{start.format("M/D h:mma")} - {end.format("M/D h:mma")}\n\n**Time Period:** {name}\n**Temperature:** {temp} °{temp_unit}\n**Wind Speed:** {wind_speed} {wind_dir}\n**Forecast:** {detailed_forecast}'
+            color = 0x500000
+            footer = 'Accuracy: Bi-daily'
+
+            embed = discord.Embed(title=title, description=description, color=color)
+            embed.set_thumbnail(url=icon_url)
+            embed.set_footer(text=footer)
+
+            await ctx.send(embed=embed)
+            return
     return
 
 bot.run(TOKEN)
