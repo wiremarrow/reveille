@@ -1035,8 +1035,12 @@ async def weather(ctx, mode='HOURLY', val=1):
     json_str2 = requests.get(forecast_url).content
     forecast_json = json.loads(json_str2)
 
-    properties2 = forecast_json['properties']
-    periods = properties2['periods']
+    try:
+        properties2 = forecast_json['properties']
+        periods = properties2['periods']
+    except Exception as e:
+        await ctx.send(f'Something went wrong while accessing weather API data. {e}')
+        return
 
     for period in periods:
         number = period['number']
