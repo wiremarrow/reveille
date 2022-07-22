@@ -479,7 +479,7 @@ async def resources(ctx):
     embed.add_field(name=':wave: Howdy Web Portal', value='A comprehensive web portal connecting students, faculty, staff, etc. with online TAMU services. [Go](https://howdy.tamu.edu).', inline=True)
     embed.add_field(name=':books: TAMU Library', value='An online library system for Texas A&M aggregating books, journals, and research databases. [Go](https://library.tamu.edu).', inline=True)
     embed.add_field(name=':computer: IT Help Desk Central', value='Provides reliable and timely IT service assistance/solutions on behalf of the Department of IT. [Go](https://it.tamu.edu/help).', inline=True)
-    embed.add_field(name=':envelope: Gmail', value='Access your TAMU email account through Gmail along with other Google Workspace applications. [Go](https://mail.google.com).', inline=True)
+    embed.add_field(name=':email: Gmail', value='Access your TAMU email account through Gmail along with other Google Workspace applications. [Go](https://mail.google.com).', inline=True)
     embed.add_field(name=':pill: Student Health Services', value='Helpful information and links for accessing a variety of TAMU medical services. [Go](https://shs.tamu.edu/services).', inline=True)
     embed.add_field(name=':map: Interactive Campus Map', value='A dynamic and layered digital map of the TAMU campus with search functionality. [Go](https://www.tamu.edu/map).', inline=True)
     embed.add_field(name=':card_box: Canvas', value='Texas A&M\'s official learning management system which integrates most course administration. [Go](https://canvas.tamu.edu).', inline=True)
