@@ -126,7 +126,8 @@ async def help(ctx):
                    f'`{PREFIX}nom (open/all)` - Generates on-campus dining locations filtered by mode.\n'
                    f'`{PREFIX}menu [place_id] (general/breakfast/lunch/dinner) (simple/detailed)` - Lists the dining menus for a specified dining location and menu type.\n'
                    f'`{PREFIX}dining (hall/north/south/central/west/east/all)` - Enumerates the `place id` for dining locations in a specified area.\n'
-                   f'`{PREFIX}gigem` - Responds with a "Gig \'em" message.')
+                   f'`{PREFIX}gigem` - Responds with a "Gig \'em" message.\n'
+                   f'`{PREFIX}events (today/tomorrow)` - Lists TAMU student events for a specified day.')
     footer = (f'[ ] = Required argument; '
               f'( ) = Optional argument; '
               f'* = Arbitrary number of arguments; '
