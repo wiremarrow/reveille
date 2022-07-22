@@ -725,7 +725,7 @@ async def nom(ctx, mode='open'):
                 if start < now and now < end:
                     is_open = True
 
-                times_str = f'{start.format("h:mm a")} - {end.format("h:mm a")}'
+                times_str = f'{start.format("h:mma")} - {end.format("h:mma")}'
                 times = f'{times}, {times_str}'
 
             times = times[2:]
@@ -748,14 +748,14 @@ async def nom(ctx, mode='open'):
 
         description = '\n'.join(vendors)
 
-        await ctx.send(f'__**Open Campus Dining Options**__ ({now.format("M/D @ h:mm a")})\n```diff\n{description}\n```')
+        await ctx.send(f'__**Open Campus Dining Options**__ ({now.format("M/D @ h:mma")})\n```diff\n{description}\n```')
         return
     elif mode == 'all':
         curated_vendors = vendors[1:52]
         description1 = '\n'.join(curated_vendors[:len(curated_vendors)//2]).strip()
         description2 = '\n'.join(curated_vendors[len(curated_vendors)//2:]).strip()
 
-        await ctx.send(f'__**All Campus Dining Options**__ ({now.format("M/D @ h:mm a")})\n```diff\n{description1}\n```')
+        await ctx.send(f'__**All Campus Dining Options**__ ({now.format("M/D @ h:mma")})\n```diff\n{description1}\n```')
         await ctx.send(f'```diff\n{description2}\n```')
         return
     else:
@@ -781,13 +781,13 @@ async def menu(ctx, place, kind='GENERAL', mode='SIMPLE'):
 
     if kind.upper() == 'BREAKFAST' or kind.upper() == 'GENERAL':
         period = periods_info[0]['id']
-        await ctx.send(f'__**{place_name} Breakfast Menus**__ ({now.format("M/D @ h:mm a")})')
+        await ctx.send(f'__**{place_name} Breakfast Menus**__ ({now.format("M/D @ h:mma")})')
     elif kind.upper() == 'LUNCH':
         period = periods_info[1]['id']
-        await ctx.send(f'__**{place_name} Lunch Menus**__ ({now.format("M/D @ h:mm a")})')
+        await ctx.send(f'__**{place_name} Lunch Menus**__ ({now.format("M/D @ h:mma")})')
     elif kind.upper() == 'DINNER':
         period = periods_info[2]['id']
-        await ctx.send(f'__**{place_name} Dinner Menus**__ ({now.format("M/D @ h:mm a")})')
+        await ctx.send(f'__**{place_name} Dinner Menus**__ ({now.format("M/D @ h:mma")})')
     else:
         await ctx.send(f'Invalid command argument.')
         return
