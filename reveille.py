@@ -1218,9 +1218,10 @@ async def prof(ctx, first, last, subject_code, course_num):
         classes_df = pd.concat([classes_df, class_df], ignore_index=True)
 
     prof_df = classes_df[classes_df['Professor'] == f'{last.upper()} {first[0].upper()}']
+    prof_mean = round(prof_df['GPA'].mean(), 4)
 
     title = f'__Information for Professor {last.upper()} {first[0].upper()}__'
-    description = f'```\n{prof_df}\n```'
+    description = f'```\nMean GPA: {prof_mean}\n{prof_df}\n```'
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
