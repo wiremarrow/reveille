@@ -1087,7 +1087,7 @@ async def weather(ctx, mode='HOURLY', val=1):
 
 # Generates a ranked list of professors for a specified course.
 @bot.command()
-async def rank(ctx, subject_code, course_num):
+async def rank(ctx, subject_code, course_num, year_min=0):
     def double_bubble_sort(l1, l2):
         for i in range(len(l1)-1, 0, -1):
             for j in range(i):
@@ -1163,7 +1163,7 @@ async def rank(ctx, subject_code, course_num):
 
     double_bubble_sort(prof_gpa, unique_profs)
 
-    title = f'Professors Ranked for {subject_code.upper()} {course_num}'
+    title = f'__Professors Ranked for {subject_code.upper()} {course_num}__'
     description = ''
     color = 0x500000
 
@@ -1178,6 +1178,54 @@ async def rank(ctx, subject_code, course_num):
     await ctx.send(embed=embed)
     return
 
-# prof_df = classes_df.query(f'')
+# Returns information for a professor and a course.
+@bot.command()
+async def prof(ctx, first, last, subject_code, course_num):
+    data = {'dept': subject_code.upper(), 'number': course_num.upper()}
+
+    search_url = 'https://anex.us/grades/getData/'
+    json_str = requests.post(search_url, data).content
+
+    course_json = json.loads(json_str)
+    classes = course_json['classes']
+
+    d1 = {'Section': [], 'Professor': [], 'Year': [], 'Semester': [], 'GPA': [],
+         'A': [], 'B': [], 'C': [], 'D': [], 'F': [], 'I': [], 'S': [], 'U': [], 'Q': [], 'X': []}
+    classes_df = pd.DataFrame(d1)
+
+    for class_ in classes:
+        section = class_['section']
+        a_freq = class_['A']
+        b_freq = class_['B']
+        c_freq = class_['C']
+        d_freq = class_['D']
+        f_freq = class_['F']
+        i_freq = class_['I']
+        s_freq = class_['S']
+        u_freq = class_['U']
+        q_freq = class_['Q']
+        x_freq = class_['X']
+        prof_name = class_['prof']
+        year = class_['year']
+        semester = class_['semester']
+        gpa = float(class_['gpa'])
+
+        d2 = {'Section': [section], 'Professor': [prof_name], 'Year': [year], 'Semester': [semester], 'GPA': [gpa],
+                    'A': [a_freq], 'B': [b_freq], 'C': [c_freq], 'D': [d_freq], 'F': [f_freq], 'I': [i_freq], 'S': [s_freq],
+                    'U': [u_freq], 'Q': [q_freq], 'X': [x_freq]}
+        class_df = pd.DataFrame(d2)
+
+        classes_df = pd.concat([classes_df, class_df], ignore_index=True)
+
+    prof_df = classes_df[classes_df['Professor'] == f'{last.upper()} {first[0].upper()}']
+
+    title = f'__Information for Professor {last.upper()} {first[0].upper()}__'
+    description = f'```\n{prof_df}\n```'
+    color = 0x500000
+
+    embed = discord.Embed(title=title, description=description, color=color)
+
+    await ctx.send(embed=embed)
+    return
 
 bot.run(TOKEN)
