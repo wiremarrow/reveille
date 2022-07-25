@@ -1180,7 +1180,7 @@ async def rank(ctx, subject_code, course_num, year_min=0):
 # Returns information for a professor for a specified course.
 @bot.command()
 async def prof(ctx, first, last, subject_code, course_num):
-    data = {'dept': subject_code.upper(), 'number': course_num.upper()}
+    data = {'dept': subject_code.upper(), 'number': course_num}
 
     search_url = 'https://anex.us/grades/getData/'
     json_str = requests.post(search_url, data).content
@@ -1217,13 +1217,20 @@ async def prof(ctx, first, last, subject_code, course_num):
         classes_df = pd.concat([classes_df, class_df], ignore_index=True)
 
     prof_df = classes_df[classes_df['Professor'] == f'{last.upper()} {first[0].upper()}']
-    prof_mean = round(prof_df['GPA'].mean(), 4)
 
-    display_df = prof_df.loc[:, ~prof_df.columns.isin(['Section', 'Professor'])]
+    if prof_df.empty:
+        await ctx.send(f'No past records were found of Professor {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()} teaching {subject_code.upper()} {course_num}.')
+        return
+
+    display_df = prof_df.loc[:, ~prof_df.columns.isin(['Professor'])]
+    prof_mean = round(display_df['GPA'].mean(), 4)
+    start_year = display_df.iloc[0, 1]
+    last_year = display_df.iloc[-1, 1]
+
     df_str = display_df.to_string(index=False)
 
-    title = f'__Information for Professor {last.upper()} {first[0].upper()}__'
-    description = f'```\nMean GPA: {prof_mean}\n{df_str}\n```'
+    title = '__Professor-Course Grading Information__'
+    description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Mean GPA:** {prof_mean}\n**Years Taught:** {start_year} - {last_year}\n\n**Raw Data:**```\n{df_str}\n```'
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
