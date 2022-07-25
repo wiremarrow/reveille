@@ -9,7 +9,9 @@ import random
 import smtplib
 import requests
 import pandas as pd
+import seaborn as sns
 import mysql.connector
+import matplotlib.pyplot as plt
 from ics import Calendar
 from bs4 import BeautifulSoup
 
@@ -1222,24 +1224,42 @@ async def prof(ctx, first, last, subject_code, course_num):
         await ctx.send(f'No past records were found of Professor {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()} teaching {subject_code.upper()} {course_num}.')
         return
 
-    display_df = prof_df.loc[:, ~prof_df.columns.isin(['Section', 'Professor'])]
+    display_df = prof_df.loc[:, ~prof_df.columns.isin(['Section', 'Professor'])].sort_values(by='Year', ascending=False)
+    display_df['GPA'] = display_df['GPA'].round(4)
     mean = round(display_df['GPA'].mean(), 4)
-    start_year = display_df.iloc[0, 0]
-    last_year = display_df.iloc[-1, 0]
+    std = round(display_df['GPA'].std(), 4)
+    start_year = display_df.iloc[-1, 0]
+    last_year = display_df.iloc[0, 0]
+    class_n = len(display_df.index)
 
-    grade_series = display_df.loc[:, ['A', 'B', 'C', 'D', 'F', 'I', 'S', 'U', 'Q', 'X']].astype('int')
-    grade_df = grade_series.sum().to_frame().T
+    display_tresh = 12
+
+    grade_s = display_df.loc[:, ['A', 'B', 'C', 'D', 'F', 'I', 'S', 'U', 'Q', 'X']].astype('int')
+    grade_df = grade_s.sum().to_frame().T
 
     grade_df_str = grade_df.to_string(index=False)
-    display_df_str = display_df.to_string(index=False)
+    display_df_str = display_df.iloc[0:display_tresh, :].to_string(index=False)
+
+    center_spacing = len(display_df_str.split('\n')[0]) // 2 - 1
+    dots = f'\n{" "*center_spacing}...' if class_n > display_tresh else ''
+
+    sns.set(rc = {'figure.figsize':(11, 8.5)})
+    plot = sns.barplot(x=grade_df.columns, y=grade_df.values[0])
+    plot.set_xlabel('Letter Grade')
+    plot.set_ylabel('Frequency')
+    fig = plot.get_figure()
+    fig.savefig('tmp/grade_hist.png')
+
+    file = discord.File('tmp/grade_hist.png', filename='grade_hist.png')
 
     title = '__Professor-Course Grading Information__'
-    description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Mean GPA:** {mean}\n**Years Taught:** {start_year} - {last_year}\n\n**Cumulative Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}\n```'
+    description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Mean GPA:** {mean}\n**Std GPA:** {std}\n**Years Taught:** {start_year} - {last_year}\n**Classes Taught:** {class_n}\n\n**Cumulative Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}{dots}\n```'
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
+    embed.set_image(url='attachment://grade_hist.png')
 
-    await ctx.send(embed=embed)
+    await ctx.send(file=file, embed=embed)
     return
 
 bot.run(TOKEN)
