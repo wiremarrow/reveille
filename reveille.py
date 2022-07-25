@@ -12,7 +12,6 @@ import pandas as pd
 import mysql.connector
 from ics import Calendar
 from bs4 import BeautifulSoup
-from html.parser import HTMLParser
 
 # Initialize config/secret vars
 c = open('config.json')
@@ -1178,7 +1177,7 @@ async def rank(ctx, subject_code, course_num, year_min=0):
     await ctx.send(embed=embed)
     return
 
-# Returns information for a professor and a course.
+# Returns information for a professor for a specified course.
 @bot.command()
 async def prof(ctx, first, last, subject_code, course_num):
     data = {'dept': subject_code.upper(), 'number': course_num.upper()}
@@ -1220,8 +1219,11 @@ async def prof(ctx, first, last, subject_code, course_num):
     prof_df = classes_df[classes_df['Professor'] == f'{last.upper()} {first[0].upper()}']
     prof_mean = round(prof_df['GPA'].mean(), 4)
 
+    display_df = prof_df.loc[:, ~prof_df.columns.isin(['Section', 'Professor'])]
+    df_str = display_df.to_string(index=False)
+
     title = f'__Information for Professor {last.upper()} {first[0].upper()}__'
-    description = f'```\nMean GPA: {prof_mean}\n{prof_df}\n```'
+    description = f'```\nMean GPA: {prof_mean}\n{df_str}\n```'
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
