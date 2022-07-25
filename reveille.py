@@ -2,6 +2,7 @@ from dis import disco
 from pydoc import Helper
 import discord
 from discord.ext import commands
+import os
 import re
 import json
 import arrow
@@ -1182,6 +1183,8 @@ async def rank(ctx, subject_code, course_num, year_min=0):
 # Returns information for a professor for a specified course.
 @bot.command()
 async def prof(ctx, first, last, subject_code, course_num):
+    now = arrow.utcnow().to('US/Central')
+
     data = {'dept': subject_code.upper(), 'number': course_num}
 
     search_url = 'https://anex.us/grades/getData/'
@@ -1243,21 +1246,24 @@ async def prof(ctx, first, last, subject_code, course_num):
     center_spacing = len(display_df_str.split('\n')[0]) // 2 - 1
     dots = f'\n{" "*center_spacing}...' if class_n > display_tresh else ''
 
-    sns.set(rc = {'figure.figsize':(11, 8.5)})
-    plot = sns.barplot(x=grade_df.columns, y=grade_df.values[0])
-    plot.set_xlabel('Letter Grade')
-    plot.set_ylabel('Frequency')
-    fig = plot.get_figure()
-    fig.savefig('tmp/grade_hist.png')
+    file_name = f'{now.timestamp()}_{first.upper()}_{last.upper()}.png'
 
-    file = discord.File('tmp/grade_hist.png', filename='grade_hist.png')
+    plot = plt.bar(x=grade_df.columns, height=grade_df.values[0])
+    plt.title(f'Grading Distribution for Professor {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}')
+    plt.xlabel('Letter Grade')
+    plt.ylabel('Frequency')
+    plt.savefig(f'tmp/{file_name}')
+    plt.close()
+
+    file = discord.File(f'tmp/{file_name}', filename=file_name)
+    os.remove(f'tmp/{file_name}')
 
     title = '__Professor-Course Grading Information__'
     description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Mean GPA:** {mean}\n**Std GPA:** {std}\n**Years Taught:** {start_year} - {last_year}\n**Classes Taught:** {class_n}\n\n**Cumulative Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}{dots}\n```'
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
-    embed.set_image(url='attachment://grade_hist.png')
+    embed.set_image(url=f'attachment://{file_name}')
 
     await ctx.send(file=file, embed=embed)
     return
