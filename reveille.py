@@ -1222,30 +1222,18 @@ async def prof(ctx, first, last, subject_code, course_num):
         await ctx.send(f'No past records were found of Professor {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()} teaching {subject_code.upper()} {course_num}.')
         return
 
-    display_df = prof_df.loc[:, ~prof_df.columns.isin(['Professor'])]
-    prof_mean = round(display_df['GPA'].mean(), 4)
-    start_year = display_df.iloc[0, 1]
-    last_year = display_df.iloc[-1, 1]
-    a_cum = display_df['A'].astype('int').sum()
-    b_cum = display_df['B'].astype('int').sum()
-    c_cum = display_df['C'].astype('int').sum()
-    d_cum = display_df['D'].astype('int').sum()
-    f_cum = display_df['F'].astype('int').sum()
-    i_cum = display_df['I'].astype('int').sum()
-    s_cum = display_df['S'].astype('int').sum()
-    u_cum = display_df['U'].astype('int').sum()
-    q_cum = display_df['Q'].astype('int').sum()
-    x_cum = display_df['X'].astype('int').sum()
+    display_df = prof_df.loc[:, ~prof_df.columns.isin(['Section', 'Professor'])]
+    mean = round(display_df['GPA'].mean(), 4)
+    start_year = display_df.iloc[0, 0]
+    last_year = display_df.iloc[-1, 0]
 
-    d3 = {'A': [a_cum], 'B': [b_cum], 'C': [c_cum], 'D': [d_cum], 'F': [f_cum], 'I': [i_cum], 'S': [s_cum],
-          'U': [u_cum], 'Q': [q_cum], 'X': [x_cum]}
-    grade_df = pd.DataFrame(d3)
+    grade_df = display_df.loc[:, ['A', 'B', 'C', 'D', 'F', 'I', 'S', 'U', 'Q', 'X']].astype('int').sum()
 
     grade_df_str = grade_df.to_string(index=False)
     display_df_str = display_df.to_string(index=False)
 
     title = '__Professor-Course Grading Information__'
-    description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Mean GPA:** {prof_mean}\n**Years Taught:** {start_year} - {last_year}\n\n**Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}\n```'
+    description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Mean GPA:** {mean}\n**Years Taught:** {start_year} - {last_year}\n\n**Cumulative Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}\n```'
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
