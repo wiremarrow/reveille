@@ -1,5 +1,6 @@
 __pycache__/
 
+tmp/
+
 .DS_Store
 secret.json
-grade_hist.png
