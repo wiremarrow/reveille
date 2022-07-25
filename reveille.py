@@ -1227,7 +1227,8 @@ async def prof(ctx, first, last, subject_code, course_num):
     start_year = display_df.iloc[0, 0]
     last_year = display_df.iloc[-1, 0]
 
-    grade_df = display_df.loc[:, ['A', 'B', 'C', 'D', 'F', 'I', 'S', 'U', 'Q', 'X']].astype('int').sum()
+    grade_series = display_df.loc[:, ['A', 'B', 'C', 'D', 'F', 'I', 'S', 'U', 'Q', 'X']].astype('int')
+    grade_df = grade_series.sum().to_frame().T
 
     grade_df_str = grade_df.to_string(index=False)
     display_df_str = display_df.to_string(index=False)
