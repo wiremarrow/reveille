@@ -1245,8 +1245,10 @@ async def prof(ctx, first, last, subject_code, course_num, year_min=0):
     file = discord.File(f'tmp/{file_name}', filename=file_name)
     os.remove(f'tmp/{file_name}')
 
+    year_min = 'None' if year_min == 0 else year_min
+
     title = '__Professor-Course Grading Information__'
-    description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Mean GPA:** {mean}\n**Std GPA:** {std}\n**Years Taught:** {start_year} - {last_year}\n**Classes Taught:** {class_n}\n\n**Cumulative Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}{dots}\n```'
+    description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Year Min:** {year_min}\n**Mean GPA:** {mean}\n**Std GPA:** {std}\n**Years Taught:** {start_year} - {last_year}\n**Classes Taught:** {class_n}\n\n**Cumulative Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}{dots}\n```'
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
