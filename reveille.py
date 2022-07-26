@@ -1,5 +1,3 @@
-from dis import disco
-from pydoc import Helper
 import discord
 from discord.ext import commands
 import os
@@ -10,7 +8,6 @@ import random
 import smtplib
 import requests
 import pandas as pd
-import seaborn as sns
 import mysql.connector
 import matplotlib.pyplot as plt
 from ics import Calendar
