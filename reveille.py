@@ -1126,6 +1126,7 @@ async def rank(ctx, subject_code, course_num, year_min=2021):
     classes_df = classes_df.sort_values(by=['GPA'], ascending=False).loc[classes_df['Year'].astype('int') >= int(year_min)]
 
     unique_profs = []
+    ordered_profs = []
 
     for index, row in classes_df.iterrows():
         prof = row['Professor']
@@ -1133,17 +1134,31 @@ async def rank(ctx, subject_code, course_num, year_min=2021):
         if prof not in unique_profs:
             unique_profs.append(prof)
 
+    profs_mean_df = pd.DataFrame(columns=classes_df.columns)
+
+    for unique_prof in unique_profs:
+        prof_df = classes_df.loc[classes_df['Professor'] == unique_prof]
+        prof_mean = prof_df['GPA'].mean()
+
+        d3 = {'Professor': [unique_prof], 'Mean GPA': [prof_mean]}
+        prof_mean_df = pd.DataFrame(d3)
+
+        profs_mean_df = pd.concat([profs_mean_df, prof_mean_df], ignore_index=True)
+
+    profs_mean_df = profs_mean_df.sort_values(by=['Mean GPA'], ascending=False)
+    ordered_profs = profs_mean_df['Professor'].values.tolist()
+
     title = f'__Professors Ranked for Course__'
     description = ''
     color = 0x500000
 
     display_tresh = 8
 
-    for i in range(len(unique_profs)):
+    for i in range(len(ordered_profs)):
         if i == display_tresh:
             break
 
-        unique_prof = unique_profs[i]
+        unique_prof = ordered_profs[i]
         unique_prof_df = classes_df.loc[classes_df['Professor'] == unique_prof].sort_values(by=['Year'], ascending=False)
         mean = round(unique_prof_df['GPA'].mean(), 2)
         std = round(unique_prof_df['GPA'].std(), 2)
