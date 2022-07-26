@@ -1086,19 +1086,7 @@ async def weather(ctx, mode='HOURLY', val=1):
 
 # Generates a ranked list of professors for a specified course.
 @bot.command()
-async def rank(ctx, subject_code, course_num, year_min=0):
-    def double_bubble_sort(l1, l2):
-        for i in range(len(l1)-1, 0, -1):
-            for j in range(i):
-                if l1[j]<l1[j+1]:
-                    temp = l1[j]
-                    l1[j] = l1[j+1]
-                    l1[j+1] = temp
-
-                    temp = l2[j]
-                    l2[j] = l2[j+1]
-                    l2[j+1] = temp
-
+async def rank(ctx, subject_code, course_num, year_min=2021):
     data = {'dept': subject_code.upper(), 'number': course_num.upper()}
 
     search_url = 'https://anex.us/grades/getData/'
@@ -1135,42 +1123,44 @@ async def rank(ctx, subject_code, course_num, year_min=0):
 
         classes_df = pd.concat([classes_df, class_df], ignore_index=True)
 
-    classes_df = classes_df.sort_values(by=['GPA'], ascending=False)
+    classes_df = classes_df.sort_values(by=['GPA'], ascending=False).loc[classes_df['Year'].astype('int') >= int(year_min)]
 
     unique_profs = []
-    prof_data = []
-    prof_gpa = []
 
     for index, row in classes_df.iterrows():
         prof = row['Professor']
-        gpa = row['GPA']
 
         if prof not in unique_profs:
             unique_profs.append(prof)
-            prof_data.append({'GPA_CUM': gpa, 'N': 1})
-        else:
-            i = unique_profs.index(prof)
-            prof_data[i]['GPA_CUM'] = prof_data[i]['GPA_CUM'] + gpa
-            prof_data[i]['N'] = prof_data[i]['N'] + 1
 
-    for i in range(len(unique_profs)):
-        cum_gpa = prof_data[i]['GPA_CUM']
-        n = prof_data[i]['N']
-        mean_gpa = cum_gpa / n
-
-        prof_gpa.append(mean_gpa)
-
-    double_bubble_sort(prof_gpa, unique_profs)
-
-    title = f'__Professors Ranked for {subject_code.upper()} {course_num}__'
+    title = f'__Professors Ranked for Course__'
     description = ''
     color = 0x500000
 
-    for i in range(len(unique_profs)):
-        entry = f'{unique_profs[i]} {round(prof_gpa[i], 4)}'
-        description = f'{description}\n{entry}'
+    display_tresh = 8
 
-    description = description.strip()
+    for i in range(len(unique_profs)):
+        if i == display_tresh:
+            break
+
+        unique_prof = unique_profs[i]
+        unique_prof_df = classes_df.loc[classes_df['Professor'] == unique_prof].sort_values(by=['Year'], ascending=False)
+        mean = round(unique_prof_df['GPA'].mean(), 2)
+        std = round(unique_prof_df['GPA'].std(), 2)
+        start_year = unique_prof_df.iloc[-1, unique_prof_df.columns.get_loc('Year')]
+        last_year = unique_prof_df.iloc[0, unique_prof_df.columns.get_loc('Year')]
+        class_n = len(unique_prof_df.index)
+
+        grade_df = unique_prof_df.loc[:, unique_prof_df.columns.isin(['A', 'B', 'C', 'D', 'F', 'I', 'S', 'U', 'Q', 'X'])].astype('int')
+        cum_grade_df = grade_df.sum().to_frame().T
+
+        grade_df_str = cum_grade_df.to_string(index=False)
+
+        description = f'{description}\n**{unique_prof}** | **μGPA:** {mean}; **σGPA:** {std}; **Taught:** {start_year[2:]}-{last_year[2:]} **Class N:** {class_n}```\n{grade_df_str}\n```'
+
+    year_min = 'None' if year_min == 0 else year_min
+
+    description = f'**Course:** {subject_code.upper()} {course_num}\n**Year Min:** {year_min}\n\n{description.strip()}'
 
     embed = discord.Embed(title=title, description=description, color=color)
 
@@ -1234,10 +1224,10 @@ async def prof(ctx, first, last, subject_code, course_num, year_min=0):
 
     display_tresh = 12
 
-    grade_s = display_df.loc[:, ['A', 'B', 'C', 'D', 'F', 'I', 'S', 'U', 'Q', 'X']].astype('int')
-    grade_df = grade_s.sum().to_frame().T
+    grade_df = display_df.loc[:, ['A', 'B', 'C', 'D', 'F', 'I', 'S', 'U', 'Q', 'X']].astype('int')
+    cum_grade_df = grade_df.sum().to_frame().T
 
-    grade_df_str = grade_df.to_string(index=False)
+    grade_df_str = cum_grade_df.to_string(index=False)
     display_df_str = display_df.iloc[0:display_tresh, :].to_string(index=False)
 
     center_spacing = len(display_df_str.split('\n')[0]) // 2 - 1
@@ -1245,7 +1235,7 @@ async def prof(ctx, first, last, subject_code, course_num, year_min=0):
 
     file_name = f'{now.timestamp()}_{first.upper()}_{last.upper()}.png'
 
-    plot = plt.bar(x=grade_df.columns, height=grade_df.values[0])
+    plot = plt.bar(x=cum_grade_df.columns, height=cum_grade_df.values[0])
     plt.title(f'Grading Distribution for Professor {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}')
     plt.xlabel('Letter Grade')
     plt.ylabel('Frequency')
