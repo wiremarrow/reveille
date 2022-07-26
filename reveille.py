@@ -124,6 +124,8 @@ async def help(ctx):
                    f':mag: `{PREFIX}search [search_num] [*terms]` - Shows `search_num` results from the TAMU directory for an arbitrary amount of search terms.\n\n'
                    f'__Courses & Schedule__\n'
                    f':notebook_with_decorative_cover: `{PREFIX}course [subject_code] [course_num]` - Returns credit information, a description, and important attributes about a specified course.\n'
+                   f':trophy: `{PREFIX}rank [subject_code] [course_num] (year_min)` - Lists professors along with their basic info for a specified course in descending order of mean GPA.\n'
+                   f':teacher: `{PREFIX}prof [first] [last] [subject_code] [course_num] (year_min)` - Provides detailed data on a specified professor\'s grading history for a course.\n'
                    f':page_facing_up: `{PREFIX}schedule` - Enumerates the classes in your schedule with credit information.\n'
                    f':green_book: `{PREFIX}add_class [subject_code] [course_num] [section_num]` - Adds a specified class to your schedule.\n'
                    f':closed_book: `{PREFIX}remove_class [subject_code] [course_num] [section_num]` - Removes a specified class from your schedule.\n'
