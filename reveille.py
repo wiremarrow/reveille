@@ -1179,7 +1179,7 @@ async def rank(ctx, subject_code, course_num, year_min=0):
 
 # Returns information for a professor for a specified course.
 @bot.command()
-async def prof(ctx, first, last, subject_code, course_num):
+async def prof(ctx, first, last, subject_code, course_num, year_min=0):
     now = arrow.utcnow().to('US/Central')
 
     data = {'dept': subject_code.upper(), 'number': course_num}
@@ -1224,7 +1224,7 @@ async def prof(ctx, first, last, subject_code, course_num):
         await ctx.send(f'No past records were found of Professor {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()} teaching {subject_code.upper()} {course_num}.')
         return
 
-    display_df = prof_df.loc[:, ~prof_df.columns.isin(['Section', 'Professor'])].sort_values(by='Year', ascending=False)
+    display_df = prof_df.loc[prof_df['Year'].astype('int') >= int(year_min), ~prof_df.columns.isin(['Section', 'Professor'])].sort_values(by='Year', ascending=False)
     display_df['GPA'] = display_df['GPA'].round(4)
     mean = round(display_df['GPA'].mean(), 4)
     std = round(display_df['GPA'].std(), 4)
