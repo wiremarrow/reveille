@@ -1308,7 +1308,7 @@ async def garage(ctx):
         name = space[0][1]
         space_num = space[1]
 
-        desc = f'{desc}`{i+1}` **{name}** ({code})\n__Spaces:__ {space_num} available.\n\n'
+        desc = f'{desc}**{name}** ({code}) has {space_num} spaces available.\n\n'
 
     title = '__Open Parking Garage Spaces__'
     description = desc.strip()
