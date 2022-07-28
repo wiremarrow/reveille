@@ -833,7 +833,7 @@ async def menu(ctx, place, kind='GENERAL', mode='SIMPLE'):
             calories = str(nutrients[0]['value']).replace('less than 1 gram', '<1')
 
             desc_part = f'__Description:__ {desc}\n' if desc is not None else ''
-            ingredients_part = f'__Ingredients__ {ingredients}\n' if ingredients is not None else ''
+            ingredients_part = f'__Ingredients:__ {ingredients}\n' if ingredients is not None else ''
 
             if mode.upper() == 'SIMPLE':
                 item_str = f'`{i+1}` **{item_name}** ({portion}) [{calories} cal]'
