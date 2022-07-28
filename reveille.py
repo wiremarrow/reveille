@@ -1274,4 +1274,63 @@ async def prof(ctx, first, last, subject_code, course_num, year_min=0):
     await ctx.send(file=file, embed=embed)
     return
 
+# Shows real-time open parking garage spaces
+@bot.command()
+async def garage(ctx):
+    search_url = 'https://transport.tamu.edu/Parking/realtime.aspx'
+    html_str = requests.get(search_url).content
+    soup = BeautifulSoup(html_str, 'html.parser')
+
+    table = soup.find(class_='table table-striped table-condensed')
+    trs = table.find_all('tr')[1:]
+
+    tr_parts = []
+
+    for tr in trs:
+        td_parts = []
+
+        tds = tr.find_all('td')
+
+        for td in tds:
+            td_str = re.sub(r'\n\s*\n', '\n', td.text).strip()
+            td_str = re.sub(r'\n\s+', '\n', td_str)
+            td_parts.extend([td_str])
+
+        tr_parts.extend([td_parts])
+
+    desc = ''
+
+    spaces_info = [(x[0].split('\r\n'), x[1]) for x in tr_parts]
+
+    for i in range(len(spaces_info)):
+        space = spaces_info[i]
+        code = space[0][0]
+        name = space[0][1]
+        space_num = space[1]
+
+        desc = f'{desc}`{i+1}` **{name}** ({code})\n__Spaces:__ {space_num} available.\n\n'
+
+    title = '__Open Parking Garage Spaces__'
+    description = desc.strip()
+    color = 0x500000
+
+    embed = discord.Embed(title=title, description=description, color=color)
+
+    await ctx.send(embed=embed)
+    return
+
+# # Displays bus route information
+# @bot.command()
+# async def bus(ctx, route_code='OnCampus'):
+#     url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r={route_code}'
+
+#     title = '__Bus Route Information__'
+#     description = f''
+#     color = 0x500000
+
+#     embed = discord.Embed(title=title, decsription=description, color=color)
+
+#     await ctx.send(embed=embed)
+#     return
+
 bot.run(TOKEN)
