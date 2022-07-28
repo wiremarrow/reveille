@@ -136,6 +136,7 @@ async def help(ctx):
                    f':hamburger: `{PREFIX}menu [place_id] ((\'general\'/\'breakfast\')/\'lunch\'/\'dinner\') (\'simple\'/\'detailed\')` - Lists the dining menus for a specified dining location (using a `place_id`) for a particular specified menu type and presentation.\n\n'
                    f'__Extra & Fun__\n'
                    f':partly_sunny: `{PREFIX}weather (\'hourly\'/\'bidaily\') (step_num)` - Reports weather info given a specified forecast mode at `step_num` steps of forecast mode iteration.\n'
+                   f':blue_car: `{PREFIX}garage` - Displays the real-time available spaces for all parking garages.\n'
                    f':thumbsup: `{PREFIX}gigem` - Responds with a "Gig \'em" message.')
     footer = ('[ ] = Required argument; '
               '( ) = Optional argument; '
