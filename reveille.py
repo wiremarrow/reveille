@@ -1325,10 +1325,20 @@ async def garage(ctx):
 async def bus(ctx, route_code='OnCampus'):
     now = arrow.utcnow().to('US/Central')
 
+    # announcements_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Announcements?request.preventCache={now.timestamp()}'
+    # json_str = requests.get(announcements_url).content
+
+    # announcements_json = json.loads(json_str)
+    # links = announcements_json['Links']
+    # url = links['Uri']
+    # datetime = arrow.get(announcements_json['PublishDate'])
+    # a_title = announcements_json['Title']['Text']
+    # summary = announcements_json['Summary']
+
     # url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r={route_code}'
 
-    search_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
-    json_str = requests.get(search_url).content
+    routes_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
+    json_str = requests.get(routes_url).content
 
     routes_json = json.loads(json_str)
     routes = routes_json
