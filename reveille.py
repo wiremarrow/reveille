@@ -1343,7 +1343,7 @@ async def bus(ctx, route_code='OnCampus'):
     routes_json = json.loads(json_str)
     routes = routes_json
 
-    print(routes_json)
+    # print(routes_json)
 
     desc = ''
 
@@ -1352,15 +1352,42 @@ async def bus(ctx, route_code='OnCampus'):
         group_name = group['Name']
 
         name = route['Name'].strip()
-        short_name = route['ShortName']
+        code = route['ShortName']
         # r_color = route['Color']
 
-        print(group_name, name, short_name)
+        # print(group_name, name, code)
 
-        desc = f'{desc}\n{group_name} **{name}** ({short_name})'
+        # desc = f'{desc}\n{group_name} **{name}** ({code})'
+
+        if route_code.upper() == code:
+            route_url = f'https://transport.tamu.edu/BusRoutesFeed/api/route/{code}/pattern/{now.format("YYYY-MM-DD")}?request.preventCache={now.timestamp()}'
+            route_json_str = requests.get(route_url).content
+
+            route_data_json = json.loads(route_json_str)
+            points = route_data_json
+
+            for point in points:
+                point_name = point['Name']
+                rank = point['Rank']
+                lat = float(point['Latitude'])
+                lon = float(point['Longtitude'])
+                stop_code = None
+
+                try:
+                    stop_code = point['Stop']['StopCode']
+                except:
+                    None
+                
+                if stop_code is not None:
+                    desc = f'{desc}\n{rank} **{point_name}** @ {lat} {lon}'
+                else:
+                    desc = f'{desc}\n{rank} @ {lat} {lon}'
+
+    print(desc)
 
     title = '__Bus Route Information__'
-    description = desc.strip()
+    # description = desc.strip()
+    description = f''
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
