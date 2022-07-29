@@ -1320,18 +1320,42 @@ async def garage(ctx):
     await ctx.send(embed=embed)
     return
 
-# # Displays bus route information
-# @bot.command()
-# async def bus(ctx, route_code='OnCampus'):
-#     url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r={route_code}'
+# Displays bus route information
+@bot.command()
+async def bus(ctx, route_code='OnCampus'):
+    now = arrow.utcnow().to('US/Central')
 
-#     title = '__Bus Route Information__'
-#     description = f''
-#     color = 0x500000
+    # url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r={route_code}'
 
-#     embed = discord.Embed(title=title, decsription=description, color=color)
+    search_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
+    json_str = requests.get(search_url).content
 
-#     await ctx.send(embed=embed)
-#     return
+    routes_json = json.loads(json_str)
+    routes = routes_json
+
+    print(routes_json)
+
+    desc = ''
+
+    for route in routes:
+        group = route['Group']
+        group_name = group['Name']
+
+        name = route['Name'].strip()
+        short_name = route['ShortName']
+        # r_color = route['Color']
+
+        print(group_name, name, short_name)
+
+        desc = f'{desc}\n{group_name} **{name}** ({short_name})'
+
+    title = '__Bus Route Information__'
+    description = desc.strip()
+    color = 0x500000
+
+    embed = discord.Embed(title=title, description=description, color=color)
+
+    await ctx.send(embed=embed)
+    return
 
 bot.run(TOKEN)
