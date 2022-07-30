@@ -1323,7 +1323,7 @@ async def garage(ctx):
 
 # Displays bus route information
 @bot.command()
-async def bus(ctx, route_code='OnCampus'):
+async def route(ctx, route_code='OnCampus'):
     now = arrow.utcnow().to('US/Central')
 
     # announcements_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Announcements?request.preventCache={now.timestamp()}'
@@ -1368,6 +1368,8 @@ async def bus(ctx, route_code='OnCampus'):
             points = route_data_json
 
             point_list = []
+            name_list = []
+            unique_name_list = []
 
             for point in points:
                 point_name = point['Name']
@@ -1381,7 +1383,7 @@ async def bus(ctx, route_code='OnCampus'):
                 except:
                     None
 
-                point = Point(lat, lon)
+                point = Point(lon, lat)
 
                 point_list.append(point)
 
@@ -1389,13 +1391,34 @@ async def bus(ctx, route_code='OnCampus'):
                     desc = f'{desc}\n{rank} **{point_name}** @ {lat} {lon}'
                 else:
                     desc = f'{desc}\n{rank} @ {lat} {lon}'
+                
+                name_list.append(point_name)
 
-            file_name = f'{now.timestamp()}_{name}_{code}.png'
+            file_name = f'{now.timestamp()}_{code}.png'
 
-            line = LineString([[p.y, p.x] for p in point_list])
+            line = LineString([[p.x, p.y] for p in point_list])
 
-            plot = plt.plot(*line.xy)
-            plt.title(f'Visualized Bus Route for {name} ({code})')
+            plt.plot(*line.xy)
+
+            ax = plt.gca()
+
+            for i in range(len(name_list)):
+                if name_list[i] != 'Way Point':
+                    name_val = name_list[i]
+                    coords = list(line.coords)
+                    x_val = coords[i][0]
+                    y_val = coords[i][1]
+
+                    if name_val not in unique_name_list:
+                        print(name_val)
+                        unique_name_list.append(name_val)
+                        ax.text(x_val, y_val, 's', fontsize=2, bbox=dict(boxstyle="circle,pad=.1", fc="blue"))
+                        plt.annotate(name_val, xy=(x_val, y_val), xytext=(x_val+1, y_val+1), fontsize=6, horizontalalignment='right', verticalalignment='top')
+                    else:
+                        pass
+
+            plt.axis('off')
+            plt.title(f'Live Bus Route Visualization for {name} ({code})')
             plt.savefig(f'tmp/{file_name}')
             plt.close()
 
