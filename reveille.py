@@ -1390,11 +1390,12 @@ async def bus(ctx, route_code='OnCampus'):
                 else:
                     desc = f'{desc}\n{rank} @ {lat} {lon}'
 
-            file_name = f'{now.timestamp()}_{group_name}_{name}.png'
+            file_name = f'{now.timestamp()}_{name}_{code}.png'
 
-            line = LineString([[p.x, p.y] for p in point_list])
-            plt.plot(*line.xy)
-            plt.title(f'Visualized Bus Route for {name}')
+            line = LineString([[p.y, p.x] for p in point_list])
+
+            plot = plt.plot(*line.xy)
+            plt.title(f'Visualized Bus Route for {name} ({code})')
             plt.savefig(f'tmp/{file_name}')
             plt.close()
 
@@ -1403,7 +1404,7 @@ async def bus(ctx, route_code='OnCampus'):
 
             title = '__Bus Route Information__'
             # description = desc.strip()
-            description = f''
+            description = f'test'
             color = 0x500000
 
             embed = discord.Embed(title=title, description=description, color=color)
@@ -1411,6 +1412,30 @@ async def bus(ctx, route_code='OnCampus'):
 
             await ctx.send(file=file, embed=embed)
             return
+
+            # file_name = f'{now.timestamp()}_{first.upper()}_{last.upper()}.png'
+
+            # plot = plt.bar(x=cum_grade_df.columns, height=cum_grade_df.values[0])
+            # plt.title(f'Grading Distribution for Professor {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}')
+            # plt.xlabel('Letter Grade')
+            # plt.ylabel('Frequency')
+            # plt.savefig(f'tmp/{file_name}')
+            # plt.close()
+
+            # file = discord.File(f'tmp/{file_name}', filename=file_name)
+            # os.remove(f'tmp/{file_name}')
+
+            # year_min = 'None' if year_min == 0 else year_min
+
+            # title = '__Professor-Course Grading Information__'
+            # description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Year Min:** {year_min}\n**Mean GPA:** {mean}\n**Std GPA:** {std}\n**Years Taught:** {start_year} - {last_year}\n**Classes Taught:** {class_n}\n\n**Cumulative Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}{dots}\n```'
+            # color = 0x500000
+
+            # embed = discord.Embed(title=title, description=description, color=color)
+            # embed.set_image(url=f'attachment://{file_name}')
+
+            # await ctx.send(file=file, embed=embed)
+            # return
 
     # print(desc)
 
