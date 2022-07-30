@@ -12,6 +12,7 @@ import mysql.connector
 import matplotlib.pyplot as plt
 from ics import Calendar
 from bs4 import BeautifulSoup
+from shapely.geometry import Point, LineString
 
 # Initialize config/secret vars
 c = open('config.json')
@@ -1366,6 +1367,8 @@ async def bus(ctx, route_code='OnCampus'):
             route_data_json = json.loads(route_json_str)
             points = route_data_json
 
+            point_list = []
+
             for point in points:
                 point_name = point['Name']
                 rank = point['Rank']
@@ -1377,22 +1380,48 @@ async def bus(ctx, route_code='OnCampus'):
                     stop_code = point['Stop']['StopCode']
                 except:
                     None
-                
+
+                point = Point(lat, lon)
+
+                point_list.append(point)
+
                 if stop_code is not None:
                     desc = f'{desc}\n{rank} **{point_name}** @ {lat} {lon}'
                 else:
                     desc = f'{desc}\n{rank} @ {lat} {lon}'
 
-    print(desc)
+            file_name = f'{now.timestamp()}_{group_name}_{name}.png'
 
-    title = '__Bus Route Information__'
-    # description = desc.strip()
-    description = f''
-    color = 0x500000
+            line = LineString([[p.x, p.y] for p in point_list])
+            plt.plot(*line.xy)
+            plt.title(f'Visualized Bus Route for {name}')
+            plt.savefig(f'tmp/{file_name}')
+            plt.close()
 
-    embed = discord.Embed(title=title, description=description, color=color)
+            file = discord.File(f'tmp/{file_name}', filename=file_name)
+            os.remove(f'tmp/{file_name}')
 
-    await ctx.send(embed=embed)
-    return
+            title = '__Bus Route Information__'
+            # description = desc.strip()
+            description = f''
+            color = 0x500000
+
+            embed = discord.Embed(title=title, description=description, color=color)
+            embed.set_image(url=f'attachment://{file_name}')
+
+            await ctx.send(file=file, embed=embed)
+            return
+
+    # print(desc)
+
+    # title = '__Bus Route Information__'
+    # # description = desc.strip()
+    # description = f''
+    # color = 0x500000
+
+    # embed = discord.Embed(title=title, description=description, color=color)
+
+    # await ctx.send(embed=embed)
+    # return
 
 bot.run(TOKEN)
