@@ -113,17 +113,17 @@ async def on_member_join(member):
 @bot.command()
 async def help(ctx):
     title = '__Command Help Menu__'
-    description = (f'__Utility__\n'
+    description = (f'**Utility**\n'
                    f':raised_hand: `{PREFIX}help` - Produces a help menu for command descriptions and syntax.\n'
                    f':email: `{PREFIX}register [net_id]` - Register your NetID with the bot to verify yourself.\n'
                    f':white_check_mark: `{PREFIX}verify [verif_code]` - Verifies you if correct verification code is passed.\n'
                    f':eye: `{PREFIX}is_verified [@user]` - Checks if a user has verified their NetID with the bot.\n\n'
-                   f'__School__\n'
+                   f'**School**\n'
                    f':books: `{PREFIX}resources` - Displays school resources with descriptions and hyperlinks.\n'
                    f':calendar: `{PREFIX}calendar (event_num)` - Lists next `event_num` academic events from now.\n'
                    f':newspaper: `{PREFIX}events (\'today\'/\'tomorrow\')` - Lists student events for a specified day.\n'
                    f':mag: `{PREFIX}search [search_num] [*terms]` - Shows `search_num` results from the TAMU directory for an arbitrary amount of search terms.\n\n'
-                   f'__Courses & Schedule__\n'
+                   f'**Courses & Schedule**\n'
                    f':notebook_with_decorative_cover: `{PREFIX}course [subject_code] [course_num]` - Returns credit information, a description, and important attributes about a specified course.\n'
                    f':trophy: `{PREFIX}rank [subject_code] [course_num] (year_min)` - Lists professors along with their basic info for a specified course in descending order of mean GPA.\n'
                    f':teacher: `{PREFIX}prof [first] [last] [subject_code] [course_num] (year_min)` - Provides detailed data on a specified professor\'s grading history for a course.\n'
@@ -131,11 +131,11 @@ async def help(ctx):
                    f':green_book: `{PREFIX}add_class [subject_code] [course_num] [section_num]` - Adds a specified class to your schedule.\n'
                    f':closed_book: `{PREFIX}remove_class [subject_code] [course_num] [section_num]` - Removes a specified class from your schedule.\n'
                    f':student: `{PREFIX}students [subject_code] [course_num]` - Finds all verified students with a specified course in their schedule.\n\n'
-                   f'__Campus Dining__\n'
+                   f'**Campus Dining**\n'
                    f':receipt: `{PREFIX}nom (\'open\'/\'all\')` - Generates a list of on-campus dining places filtered by mode with hours-of-operation and open status.\n'
                    f':office: `{PREFIX}dining (\'hall\'/\'north\'/\'south\'/\'central\'/\'west\'/\'east\'/\'all\')` - Enumerates the `place_id`s for dining locations in a specified area to be used with the `{PREFIX}menu` command.\n'
                    f':hamburger: `{PREFIX}menu [place_id] ((\'general\'/\'breakfast\')/\'lunch\'/\'dinner\') (\'simple\'/\'detailed\')` - Lists the dining menus for a specified dining location (using a `place_id`) for a particular specified menu type and presentation.\n\n'
-                   f'__Extra & Fun__\n'
+                   f'**Extra & Fun**\n'
                    f':partly_sunny: `{PREFIX}weather (\'hourly\'/\'bidaily\') (step_num)` - Reports weather info given a specified forecast mode at `step_num` steps of forecast mode iteration.\n'
                    f':blue_car: `{PREFIX}garage` - Displays the real-time available spaces for all parking garages.\n'
                    f':thumbsup: `{PREFIX}gigem` - Responds with a "Gig \'em" message.')
@@ -1056,8 +1056,8 @@ async def weather(ctx, mode='HOURLY', val=1):
         wind_speed = period['windSpeed']
         wind_dir = period['windDirection']
         icon_url = period['icon']
-        short_forecast = period['shortForecast'].replace('. ', '.\n')
-        detailed_forecast = period['detailedForecast'].replace('. ', '.\n')
+        short_forecast = period['shortForecast']
+        detailed_forecast = period['detailedForecast']
 
         if mode.upper() == 'HOURLY' and number == int(val):
             title = '__Weather at TAMU Campus__'
@@ -1331,13 +1331,22 @@ async def bus(ctx, route_code='OnCampus'):
 
     try:
         announcements = json.loads(json_str)
-        links = announcements['Links']
-        url = links['Uri']
-        datetime = arrow.get(announcements['PublishDate'])
-        a_title = announcements['Title']['Text']
-        summary = announcements['Summary']
+        items = announcements['Items']
 
-        # embed = discord.Embed(title=f'__{a_title}__', description=f'{summary}\n\n**Publish Date:** {datetime}', url=url)
+        for item in items:
+            links = item['Links']
+            url = f'https:{links[0]["Uri"]}'
+            datetime = arrow.get(item['PublishDate']).format('M/D/YY @ h:mma')
+            a_title = item['Title']['Text']
+            summary = item['Summary']['Text']
+
+            title = f'__{a_title}__'
+            description = f'**Announcement:** {summary}\n\n**Publish Date:** {datetime}'
+            color = 0x500000
+
+            embed = discord.Embed(title=title, description=description, color=color, url=url)
+
+            await ctx.send(embed=embed)
     except:
         pass
 
@@ -1425,11 +1434,13 @@ async def route(ctx, route_code):
                 lat = float(point['Latitude'])
                 lon = float(point['Longtitude'])
                 stop_code = None
+                header_rank = None
 
                 try:
                     stop_code = point['Stop']['StopCode']
+                    header_rank = point['Stop']['RouteHeaderRank']
                 except:
-                    None
+                    pass
 
                 point = Point(lon, lat)
 
