@@ -1323,14 +1323,14 @@ async def garage(ctx):
 
 # Shows all of the available bus routes
 @bot.command()
-async def bus(ctx, route_code='OnCampus'):
+async def bus(ctx, route_code='ALL'):
     now = arrow.utcnow().to('US/Central')
 
     announcements_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Announcements?request.preventCache={now.timestamp()}'
-    json_str = requests.get(announcements_url).content
+    json_str1 = requests.get(announcements_url).content
 
     try:
-        announcements = json.loads(json_str)
+        announcements = json.loads(json_str1)
         items = announcements['Items']
 
         for item in items:
@@ -1351,26 +1351,37 @@ async def bus(ctx, route_code='OnCampus'):
         pass
 
     routes_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
-    json_str = requests.get(routes_url).content
+    json_str2 = requests.get(routes_url).content
 
-    routes_json = json.loads(json_str)
-    routes = routes_json
+    routes = json.loads(json_str2)
 
     desc = ''
-    past_group_name = ''
 
     for route in routes:
-        group = route['Group']
-        group_name = group['Name']
+        group_name = route['Group']['Name'].replace(' ', '_')
 
-        name = route['Name'].strip()
-        code = route['ShortName']
+        if group_name.upper() == route_code.upper() or route_code.upper() == 'ALL':
+            name = route['Name'].strip()
+            code = route['ShortName']
 
-        desc = f'{desc}\n**\n{group_name}**\n{name} {code}' if group_name != past_group_name else f'{desc}\n{name} {code}'
-        past_group_name = group_name
+            desc = f'{desc}\n{name} ({code})'
 
-    title = f'__Bus Routes__'
-    description = f'**{desc.strip()[3:]}'
+    category_name = ''
+
+    if route_code.upper() == 'ALL':
+        category_name = 'All'
+    elif route_code.upper() == 'ON_CAMPUS':
+        category_name = 'On Campus'
+    elif route_code.upper() == 'OFF_CAMPUS':
+        category_name = 'Off Campus'
+    elif route_code.upper() == 'GAME_DAY':
+        category_name = 'Game Day'
+    else:
+        await ctx.send('Invalid command argument.')
+        return
+
+    title = f'__{category_name} Bus Routes__'
+    description = desc.strip()
     color = 0x500000
 
     embed = discord.Embed(title=title, description=description, color=color)
