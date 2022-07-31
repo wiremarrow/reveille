@@ -1322,9 +1322,9 @@ async def garage(ctx):
     await ctx.send(embed=embed)
     return
 
-# Shows all of the available bus routes
+# Shows all of the available bus routes for a specified route group
 @bot.command()
-async def bus(ctx, route_code='ALL'):
+async def bus(ctx, group_code='ALL'):
     now = arrow.utcnow().to('US/Central')
 
     announcements_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Announcements?request.preventCache={now.timestamp()}'
@@ -1361,7 +1361,7 @@ async def bus(ctx, route_code='ALL'):
     for route in routes:
         group_name = route['Group']['Name'].replace(' ', '_')
 
-        if group_name.upper() == route_code.upper() or route_code.upper() == 'ALL':
+        if group_name.upper() == group_code.upper() or group_code.upper() == 'ALL':
             name = route['Name'].strip()
             code = route['ShortName']
 
@@ -1369,13 +1369,13 @@ async def bus(ctx, route_code='ALL'):
 
     category_name = ''
 
-    if route_code.upper() == 'ALL':
+    if group_code.upper() == 'ALL':
         category_name = 'All'
-    elif route_code.upper() == 'ON_CAMPUS':
+    elif group_code.upper() == 'ON_CAMPUS':
         category_name = 'On Campus'
-    elif route_code.upper() == 'OFF_CAMPUS':
+    elif group_code.upper() == 'OFF_CAMPUS':
         category_name = 'Off Campus'
-    elif route_code.upper() == 'GAME_DAY':
+    elif group_code.upper() == 'GAME_DAY':
         category_name = 'Game Day'
     else:
         await ctx.send('Invalid command argument.')
@@ -1395,17 +1395,7 @@ async def bus(ctx, route_code='ALL'):
 async def route(ctx, route_code):
     now = arrow.utcnow().to('US/Central')
 
-    # announcements_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Announcements?request.preventCache={now.timestamp()}'
-    # json_str = requests.get(announcements_url).content
-
-    # announcements_json = json.loads(json_str)
-    # links = announcements_json['Links']
-    # url = links['Uri']
-    # datetime = arrow.get(announcements_json['PublishDate'])
-    # a_title = announcements_json['Title']['Text']
-    # summary = announcements_json['Summary']
-
-    # url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r={route_code}'
+    # routes_url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r={route_code}'
 
     routes_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
     json_str = requests.get(routes_url).content
