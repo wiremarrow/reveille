@@ -1369,9 +1369,9 @@ async def bus(ctx, route_code='OnCampus'):
     await ctx.send(embed=embed)
     return
 
-# Displays bus route information
+# Displays information for a specified bus route
 @bot.command()
-async def route(ctx):
+async def route(ctx, route_code):
     now = arrow.utcnow().to('US/Central')
 
     # announcements_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Announcements?request.preventCache={now.timestamp()}'
