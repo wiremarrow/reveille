@@ -1364,7 +1364,7 @@ async def bus(ctx, route_code='ALL'):
             name = route['Name'].strip()
             code = route['ShortName']
 
-            desc = f'{desc}\n{name} ({code})'
+            desc = f'{desc}\n`{code}` {name}'
 
     category_name = ''
 
