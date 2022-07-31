@@ -138,6 +138,7 @@ async def help(ctx):
                    f'**Extra & Fun**\n'
                    f':partly_sunny: `{PREFIX}weather (\'hourly\'/\'bidaily\') (step_num)` - Reports weather info given a specified forecast mode at `step_num` steps of forecast mode iteration.\n'
                    f':blue_car: `{PREFIX}garage` - Displays the real-time available spaces for all parking garages.\n'
+                   f':bus: `{PREFIX}bus (\'all\'/\'on_campus\'/\'off_campus\'/\'game_day\')` - Lists the `route_id`s for bus routes from a specified route group to be used with the `{PREFIX}route` command.\n'
                    f':thumbsup: `{PREFIX}gigem` - Responds with a "Gig \'em" message.')
     footer = ('[ ] = Required argument; '
               '( ) = Optional argument; '
