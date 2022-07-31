@@ -1321,9 +1321,57 @@ async def garage(ctx):
     await ctx.send(embed=embed)
     return
 
+# Shows all of the available bus routes
+@bot.command()
+async def bus(ctx, route_code='OnCampus'):
+    now = arrow.utcnow().to('US/Central')
+
+    announcements_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Announcements?request.preventCache={now.timestamp()}'
+    json_str = requests.get(announcements_url).content
+
+    try:
+        announcements = json.loads(json_str)
+        links = announcements['Links']
+        url = links['Uri']
+        datetime = arrow.get(announcements['PublishDate'])
+        a_title = announcements['Title']['Text']
+        summary = announcements['Summary']
+
+        # embed = discord.Embed(title=f'__{a_title}__', description=f'{summary}\n\n**Publish Date:** {datetime}', url=url)
+    except:
+        pass
+
+    routes_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
+    json_str = requests.get(routes_url).content
+
+    routes_json = json.loads(json_str)
+    routes = routes_json
+
+    desc = ''
+    past_group_name = ''
+
+    for route in routes:
+        group = route['Group']
+        group_name = group['Name']
+
+        name = route['Name'].strip()
+        code = route['ShortName']
+
+        desc = f'{desc}\n**\n{group_name}**\n{name} {code}' if group_name != past_group_name else f'{desc}\n{name} {code}'
+        past_group_name = group_name
+
+    title = f'__Bus Routes__'
+    description = f'**{desc.strip()[3:]}'
+    color = 0x500000
+
+    embed = discord.Embed(title=title, description=description, color=color)
+
+    await ctx.send(embed=embed)
+    return
+
 # Displays bus route information
 @bot.command()
-async def route(ctx, route_code='OnCampus'):
+async def route(ctx):
     now = arrow.utcnow().to('US/Central')
 
     # announcements_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Announcements?request.preventCache={now.timestamp()}'
