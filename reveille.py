@@ -1395,91 +1395,77 @@ async def bus(ctx, group_code='ALL'):
 async def route(ctx, route_code):
     now = arrow.utcnow().to('US/Central')
 
-    # routes_url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r={route_code}'
-
     routes_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
     json_str = requests.get(routes_url).content
 
-    routes_json = json.loads(json_str)
-    routes = routes_json
-
-    # print(routes_json)
-
-    desc = ''
+    routes = json.loads(json_str)
 
     for route in routes:
-        group = route['Group']
-        group_name = group['Name']
-
-        name = route['Name'].strip()
+        group_name = route['Group']['Name']
+        route_name = route['Name'].strip()
         code = route['ShortName']
-        # r_color = route['Color']
-
-        # print(group_name, name, code)
-
-        # desc = f'{desc}\n{group_name} **{name}** ({code})'
+        # route_color = route['Color']
 
         if route_code.upper() == code:
-            route_url = f'https://transport.tamu.edu/BusRoutesFeed/api/route/{code}/pattern/{now.format("YYYY-MM-DD")}?request.preventCache={now.timestamp()}'
-            route_json_str = requests.get(route_url).content
+            file_name = f'{now.timestamp()}_{code}.png'
 
-            route_data_json = json.loads(route_json_str)
-            points = route_data_json
+            route_url = f'https://transport.tamu.edu/BusRoutesFeed/api/route/{code}/pattern/{now.format("YYYY-MM-DD")}?request.preventCache={now.timestamp()}'
+            json_str2 = requests.get(route_url).content
+
+            points = json.loads(json_str2)
 
             point_list = []
             name_list = []
+            rank_list = []
+            type_list = []
             unique_name_list = []
 
             for point in points:
                 point_name = point['Name']
-                rank = point['Rank']
                 lat = float(point['Latitude'])
                 lon = float(point['Longtitude'])
-                stop_code = None
-                header_rank = None
-
-                try:
-                    stop_code = point['Stop']['StopCode']
-                    header_rank = point['Stop']['RouteHeaderRank']
-                except:
-                    pass
+                point_type = point['PointTypeCode']
+                header_rank = point['RouteHeaderRank']
 
                 point = Point(lon, lat)
 
                 point_list.append(point)
-
-                if stop_code is not None:
-                    desc = f'{desc}\n{rank} **{point_name}** @ {lat} {lon}'
-                else:
-                    desc = f'{desc}\n{rank} @ {lat} {lon}'
-                
                 name_list.append(point_name)
-
-            file_name = f'{now.timestamp()}_{code}.png'
+                type_list.append(point_type)
+                rank_list.append(header_rank)
 
             line = LineString([[p.x, p.y] for p in point_list])
 
             plt.plot(*line.xy)
-
             ax = plt.gca()
 
             for i in range(len(name_list)):
-                if name_list[i] != 'Way Point':
-                    name_val = name_list[i]
+                point_name = name_list[i]
+                point_rank = rank_list[i]
+
+                if point_name != 'Way Point' and point_name not in unique_name_list and point_rank != -1:
                     coords = list(line.coords)
-                    x_val = coords[i][0]
-                    y_val = coords[i][1]
+                    x = coords[i][0]
+                    y = coords[i][1]
 
-                    if name_val not in unique_name_list:
-                        print(name_val)
-                        unique_name_list.append(name_val)
-                        ax.text(x_val, y_val, 's', fontsize=2, bbox=dict(boxstyle="circle,pad=.1", fc="blue"))
-                        plt.annotate(name_val, xy=(x_val, y_val), xytext=(x_val+1, y_val+1), fontsize=6, horizontalalignment='right', verticalalignment='top')
-                    else:
-                        pass
+                    unique_name_list.append(point_name)
+                    ax.text(x, y, '...', fontsize=6, bbox=dict(boxstyle="square,pad=.1", fc="blue"))
+                    plt.annotate(point_name, xy=(x, y), xytext=(x+1, y+1), fontsize=10, horizontalalignment='right', verticalalignment='top')
+            for i in range(len(name_list)):
+                point_name = name_list[i]
+                point_rank = rank_list[i]
 
+                if point_name != 'Way Point' and point_name not in unique_name_list and point_rank == -1:
+                    coords = list(line.coords)
+                    x = coords[i][0]
+                    y = coords[i][1]
+
+                    unique_name_list.append(point_name)
+                    ax.text(x, y, '.', fontsize=2, bbox=dict(boxstyle="circle,pad=.1", fc="blue"))
+                    plt.annotate(point_name, xy=(x, y), xytext=(x+1, y+1), fontsize=6, horizontalalignment='right', verticalalignment='top')
+
+            plt.title(f'Live Bus Route Visualization for {route_name} ({code})')
             plt.axis('off')
-            plt.title(f'Live Bus Route Visualization for {name} ({code})')
             plt.savefig(f'tmp/{file_name}')
             plt.close()
 
@@ -1487,8 +1473,7 @@ async def route(ctx, route_code):
             os.remove(f'tmp/{file_name}')
 
             title = '__Bus Route Information__'
-            # description = desc.strip()
-            description = f'test'
+            description = f'**Name:** {route_name}\n**Code:** {code}\n**Group:** {group_name}'
             color = 0x500000
 
             embed = discord.Embed(title=title, description=description, color=color)
@@ -1496,41 +1481,5 @@ async def route(ctx, route_code):
 
             await ctx.send(file=file, embed=embed)
             return
-
-            # file_name = f'{now.timestamp()}_{first.upper()}_{last.upper()}.png'
-
-            # plot = plt.bar(x=cum_grade_df.columns, height=cum_grade_df.values[0])
-            # plt.title(f'Grading Distribution for Professor {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}')
-            # plt.xlabel('Letter Grade')
-            # plt.ylabel('Frequency')
-            # plt.savefig(f'tmp/{file_name}')
-            # plt.close()
-
-            # file = discord.File(f'tmp/{file_name}', filename=file_name)
-            # os.remove(f'tmp/{file_name}')
-
-            # year_min = 'None' if year_min == 0 else year_min
-
-            # title = '__Professor-Course Grading Information__'
-            # description = f'**Professor:** {first[0].upper()}{first[1:].lower()} {last[0].upper()}{last[1:].lower()}\n**Course:** {subject_code.upper()} {course_num}\n**Year Min:** {year_min}\n**Mean GPA:** {mean}\n**Std GPA:** {std}\n**Years Taught:** {start_year} - {last_year}\n**Classes Taught:** {class_n}\n\n**Cumulative Grade Distribution:**```\n{grade_df_str}\n```\n**Raw Data:**```\n{display_df_str}{dots}\n```'
-            # color = 0x500000
-
-            # embed = discord.Embed(title=title, description=description, color=color)
-            # embed.set_image(url=f'attachment://{file_name}')
-
-            # await ctx.send(file=file, embed=embed)
-            # return
-
-    # print(desc)
-
-    # title = '__Bus Route Information__'
-    # # description = desc.strip()
-    # description = f''
-    # color = 0x500000
-
-    # embed = discord.Embed(title=title, description=description, color=color)
-
-    # await ctx.send(embed=embed)
-    # return
 
 bot.run(TOKEN)
