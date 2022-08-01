@@ -1394,7 +1394,7 @@ async def bus(ctx, group_code='ALL'):
 
 # Displays information for a specified bus route
 @bot.command()
-async def route(ctx, route_code):
+async def route(ctx, route_code, mode='SCALED'):
     now = arrow.utcnow().to('US/Central')
 
     routes_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
@@ -1496,7 +1496,11 @@ async def route(ctx, route_code):
 
                 desc = f'\n**Bus Color:** {bus_color}\n**Bus Type:** {type}\n**Passengers:** {passenger_total}\n**Capacity:** {passenger_cap}'
 
-            ax.set_aspect('equal', 'box')
+            if mode.upper() == 'SCALED':
+                pass
+            elif mode.upper() == 'REAL':
+                ax.set_aspect('equal', 'box')
+
             plt.title(f'Live Bus Route Visualization for {route_name} ({code})')
             plt.axis('off')
             plt.savefig(f'tmp/{file_name}')
