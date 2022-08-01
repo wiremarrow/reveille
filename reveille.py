@@ -1471,6 +1471,8 @@ async def route(ctx, route_code):
 
             busses = json.loads(json_str)
 
+            desc = ''
+
             for bus in busses:
                 bus_name = bus['Name']
                 bus_color = bus['Static']['Color']
@@ -1492,6 +1494,8 @@ async def route(ctx, route_code):
                     stop_name = next_stop['Name']
                     stop_code = next_stop['StopCode']
 
+                desc = f'\n**Bus Color:** {bus_color}\n**Bus Type:** {type}\n**Passengers:** {passenger_total}\n**Capacity:** {passenger_cap}'
+
             ax.set_aspect('equal', 'box')
             plt.title(f'Live Bus Route Visualization for {route_name} ({code})')
             plt.axis('off')
@@ -1509,7 +1513,7 @@ async def route(ctx, route_code):
             # print(time_table)
 
             title = '__Bus Route Information__'
-            description = f'**Name:** {route_name}\n**Code:** {code}\n**Group:** {group_name}'
+            description = f'**Name:** {route_name}\n**Code:** {code}\n**Group:** {group_name}{desc}'
             color = 0x500000
 
             embed = discord.Embed(title=title, description=description, color=color)
