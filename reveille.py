@@ -1449,8 +1449,9 @@ async def route(ctx, route_code):
                     x = coords[i][0]
                     y = coords[i][1]
 
-                    ax.text(x, y, '   ', fontsize=4, bbox=dict(boxstyle="square", fc="blue"))
+                    ax.text(x, y, '   ', fontsize=4, bbox=dict(boxstyle='square', fc='blue'))
                     plt.annotate(point_name, xy=(x, y), xytext=(x-20, y), fontsize=8, horizontalalignment='right', verticalalignment='center')
+
             for i in range(len(name_list)):
                 point_name = name_list[i]
                 point_rank = rank_list[i]
@@ -1462,9 +1463,36 @@ async def route(ctx, route_code):
                     x = coords[i][0]
                     y = coords[i][1]
 
-                    ax.text(x, y, ' ', fontsize=2, bbox=dict(boxstyle="circle", fc="blue"))
+                    ax.text(x, y, ' ', fontsize=2, bbox=dict(boxstyle='circle', fc='blue'))
                     plt.annotate(point_name, xy=(x, y), xytext=(x-20, y), fontsize=6, horizontalalignment='right', verticalalignment='center')
 
+            bus_url = f'https://transport.tamu.edu/BusRoutesFeed/api/route/{code}/buses/mentor?request.preventCache={now.timestamp()}'
+            json_str = requests.get(bus_url).content
+
+            busses = json.loads(json_str)
+
+            for bus in busses:
+                bus_name = bus['Name']
+                bus_color = bus['Static']['Color']
+                type = bus['Static']['Type']
+                driver = bus['Driver'] if bus['Driver'] is None else 'Unknown'
+                bus_datetime = arrow.get(bus['GPS']['Date'])
+                direction = float(bus['GPS']['Dir'])
+                bus_lat = float(bus['GPS']['Lat'])
+                bus_lon = float(bus['GPS']['Long'])
+                passenger_cap = bus['APC']['PassengerCapacity']
+                passenger_total = bus['APC']['TotalPassenger']
+                next_stops = bus['NextStops']
+
+                # ax.text(bus_lon, bus_lat, ' ', fontsize=3, bbox=dict(boxstyle='circle', fc='black'))
+                ax.text(bus_lon, bus_lat, 'BUS', ha='center', va='center', fontsize=6, rotation=direction+180, bbox=dict(boxstyle='rarrow,pad=0.3', fc='white'))
+                plt.annotate(bus_name, xy=(bus_lon, bus_lat), xytext=(bus_lon-20, bus_lat), fontsize=4, horizontalalignment='right', verticalalignment='center')
+
+                for next_stop in next_stops:
+                    stop_name = next_stop['Name']
+                    stop_code = next_stop['StopCode']
+
+            ax.set_aspect('equal', 'box')
             plt.title(f'Live Bus Route Visualization for {route_name} ({code})')
             plt.axis('off')
             plt.savefig(f'tmp/{file_name}')
@@ -1473,12 +1501,20 @@ async def route(ctx, route_code):
             file = discord.File(f'tmp/{file_name}', filename=file_name)
             os.remove(f'tmp/{file_name}')
 
+            # times_url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r=35'
+            # times_html = requests.get(times_url).content
+            # soup = BeautifulSoup(times_html, 'html.parser')
+
+            # time_table = soup.find_all(class_='timetable')
+            # print(time_table)
+
             title = '__Bus Route Information__'
             description = f'**Name:** {route_name}\n**Code:** {code}\n**Group:** {group_name}'
             color = 0x500000
 
             embed = discord.Embed(title=title, description=description, color=color)
             embed.set_image(url=f'attachment://{file_name}')
+            embed.set_footer(text='Bus location updates every 15 seconds.')
 
             await ctx.send(file=file, embed=embed)
             return
