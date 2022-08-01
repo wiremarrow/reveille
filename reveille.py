@@ -1396,9 +1396,9 @@ async def route(ctx, route_code):
     now = arrow.utcnow().to('US/Central')
 
     routes_url = f'https://transport.tamu.edu/BusRoutesFeed/api/Routes?request.preventCache={now.timestamp()}'
-    json_str = requests.get(routes_url).content
+    json_str1 = requests.get(routes_url).content
 
-    routes = json.loads(json_str)
+    routes = json.loads(json_str1)
 
     for route in routes:
         group_name = route['Group']['Name']
@@ -1417,21 +1417,18 @@ async def route(ctx, route_code):
             point_list = []
             name_list = []
             rank_list = []
-            type_list = []
             unique_name_list = []
 
             for point in points:
                 point_name = point['Name']
                 lat = float(point['Latitude'])
                 lon = float(point['Longtitude'])
-                point_type = point['PointTypeCode']
                 header_rank = point['RouteHeaderRank']
 
                 point = Point(lon, lat)
 
                 point_list.append(point)
                 name_list.append(point_name)
-                type_list.append(point_type)
                 rank_list.append(header_rank)
 
             line = LineString([[p.x, p.y] for p in point_list])
@@ -1444,25 +1441,27 @@ async def route(ctx, route_code):
                 point_rank = rank_list[i]
 
                 if point_name != 'Way Point' and point_name not in unique_name_list and point_rank != -1:
+                    unique_name_list.append(point_name)
+
                     coords = list(line.coords)
                     x = coords[i][0]
                     y = coords[i][1]
 
-                    unique_name_list.append(point_name)
-                    ax.text(x, y, '...', fontsize=6, bbox=dict(boxstyle="square,pad=.1", fc="blue"))
-                    plt.annotate(point_name, xy=(x, y), xytext=(x+1, y+1), fontsize=10, horizontalalignment='right', verticalalignment='top')
+                    ax.text(x, y, '   ', fontsize=4, bbox=dict(boxstyle="square", fc="blue"))
+                    plt.annotate(point_name, xy=(x, y), xytext=(x-20, y), fontsize=8, horizontalalignment='right', verticalalignment='center')
             for i in range(len(name_list)):
                 point_name = name_list[i]
                 point_rank = rank_list[i]
 
                 if point_name != 'Way Point' and point_name not in unique_name_list and point_rank == -1:
+                    unique_name_list.append(point_name)
+
                     coords = list(line.coords)
                     x = coords[i][0]
                     y = coords[i][1]
 
-                    unique_name_list.append(point_name)
-                    ax.text(x, y, '.', fontsize=2, bbox=dict(boxstyle="circle,pad=.1", fc="blue"))
-                    plt.annotate(point_name, xy=(x, y), xytext=(x+1, y+1), fontsize=6, horizontalalignment='right', verticalalignment='top')
+                    ax.text(x, y, ' ', fontsize=2, bbox=dict(boxstyle="circle", fc="blue"))
+                    plt.annotate(point_name, xy=(x, y), xytext=(x-20, y), fontsize=6, horizontalalignment='right', verticalalignment='center')
 
             plt.title(f'Live Bus Route Visualization for {route_name} ({code})')
             plt.axis('off')
