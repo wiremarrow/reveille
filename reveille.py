@@ -1547,10 +1547,10 @@ async def route(ctx, route_code, mode='SCALED'):
 
                     if time.strip() != '':
                         hours = int(time.split(':')[0])
-                        hours = hours % 12 if time.split(':')[1][-1] == 'P' else hours
+                        new_hours = hours + 12 if time.split(':')[1][-1] == 'P' and hours >= 1 and hours <= 11 else hours
                         minutes = int(time.split(':')[1][:-1])
                         date_time = arrow.utcnow().to('US/Central')
-                        exp_time = date_time.replace(hour=hours, minute=minutes, second=0, microsecond=0).format('h:mma')
+                        exp_time = date_time.replace(hour=new_hours, minute=minutes, second=0, microsecond=0).format('h:mma')
                     else:
                         exp_time = 'None'
 
