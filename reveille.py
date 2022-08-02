@@ -1589,7 +1589,12 @@ async def route(ctx, route_code, mode='SCALED'):
             df1_str = df1.to_string(index=False)
 
             title = '__Bus Route Information__'
-            description = f'**Name:** {route_name}\n**Code:** `{code}`\n**Group:** {group_name}\n\n{bus_desc}\n\n**Estimated Stop Times:**\n```{df1_str}```'
+
+            if not df1.empty:
+                description = f'**Name:** {route_name}\n**Code:** `{code}`\n**Group:** {group_name}\n\n{bus_desc}\n\n**Estimated Stop Times:**\n```{df1_str}```'
+            else:
+                description = f'**Name:** {route_name}\n**Code:** `{code}`\n**Group:** {group_name}\n\n{bus_desc}\n\n'
+
             color = 0x500000
 
             embed = discord.Embed(title=title, description=description, color=color)
