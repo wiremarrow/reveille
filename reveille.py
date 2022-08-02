@@ -138,7 +138,7 @@ async def help(ctx):
                    f'**Transportation**\n'
                    f':blue_car: `{PREFIX}garage` - Displays the real-time available spaces for all parking garages.\n'
                    f':bus: `{PREFIX}bus (\'all\'/\'on_campus\'/\'off_campus\'/\'game_day\')` - Lists the `route_code`s for bus routes in a specified route group to be used with the `{PREFIX}route` command.\n'
-                   f':tram: `{PREFIX}route [route_code]` - Returns information for a specified route (using a `route_code`) with accompanying estimated stop times and visualization.\n\n'
+                   f':tram: `{PREFIX}route [route_code] (\'scaled\'/\'real\')` - Returns information for a specified route (using a `route_code`) with accompanying estimated stop times, route visualization, and real-time bus tracking.\n\n'
                    f'**Extra & Fun**\n'
                    f':partly_sunny: `{PREFIX}weather (\'hourly\'/\'bidaily\') (step_num)` - Reports weather info given a specified forecast mode at `step_num` steps of forecast mode iteration.\n'
                    f':thumbsup: `{PREFIX}gigem` - Responds with a "Gig \'em" message.')
