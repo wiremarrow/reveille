@@ -1476,7 +1476,7 @@ async def route(ctx, route_code, mode='SCALED'):
             for bus in busses:
                 bus_name = bus['Name']
                 bus_color = bus['Static']['Color']
-                type = bus['Static']['Type']
+                bus_type = bus['Static']['Type']
                 driver = bus['Driver'] if bus['Driver'] is None else 'Unknown'
                 bus_datetime = arrow.get(bus['GPS']['Date'])
                 direction = float(bus['GPS']['Dir'])
@@ -1494,7 +1494,7 @@ async def route(ctx, route_code, mode='SCALED'):
                     stop_name = next_stop['Name']
                     stop_code = next_stop['StopCode']
 
-                desc = f'**Bus Status:** Operating\n**Color:** {bus_color}\n**Type:** {type}\n**Passengers:** {passenger_total}\n**Capacity:** {passenger_cap}'
+                desc = f'**Bus Status:** Operating\n**Color:** {bus_color}\n**Type:** {bus_type}\n**Passengers:** {passenger_total}\n**Capacity:** {passenger_cap}'
 
             if mode.upper() == 'SCALED':
                 pass
@@ -1509,15 +1509,61 @@ async def route(ctx, route_code, mode='SCALED'):
             file = discord.File(f'tmp/{file_name}', filename=file_name)
             os.remove(f'tmp/{file_name}')
 
-            # times_url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r=35'
-            # times_html = requests.get(times_url).content
-            # soup = BeautifulSoup(times_html, 'html.parser')
+            d1 = {}
 
-            # time_table = soup.find_all(class_='timetable')
-            # print(time_table)
+            times_url = f'https://transport.tamu.edu/busroutes/Routes.aspx?r={code}'
+            times_html = requests.get(times_url).content
+            soup = BeautifulSoup(times_html, 'html.parser')
+
+            headers = soup.find_all(class_=f'BGRouteColor RouteColorCompliment Route{code}')
+
+            header_names = []
+
+            for header in headers:
+                header_name = header.text
+                header_name = header_name[:8] if len(header_name) > 8 else header_name
+
+                if header_name in header_names:
+                    header_names[header_names.index(header_name)] = f'{header_names[header_names.index(header_name)]}1'
+                    header_names.append(f'{header_name}2')
+                else:
+                    header_names.append(header_name)
+
+            for h_name in header_names:
+                d1[h_name] = []
+
+            df1 = pd.DataFrame(d1)
+
+            trs = soup.find_all('tr')
+
+            for tr in trs[2:]:
+                tds = tr.find_all('td')
+
+                d2 = {}
+
+                for i in range(len(tds)):
+                    td = tds[i]
+                    time = td.text
+
+                    if time.strip() != '':
+                        hours = int(time.split(':')[0])
+                        hours = hours % 12 if time.split(':')[1][-1] == 'P' else hours
+                        minutes = int(time.split(':')[1][:-1])
+                        date_time = arrow.utcnow().to('US/Central')
+                        exp_time = date_time.replace(hour=hours, minute=minutes, second=0, microsecond=0).format('h:mma')
+                    else:
+                        exp_time = 'None'
+
+                    d2[df1.columns[i]] = [exp_time]
+
+                df2 = pd.DataFrame(d2)
+
+                df1 = pd.concat([df1, df2], ignore_index=True)
+
+            df1_str = df1.to_string(index=False)
 
             title = '__Bus Route Information__'
-            description = f'**Name:** {route_name}\n**Code:** `{code}`\n**Group:** {group_name}\n\n{desc}'
+            description = f'**Name:** {route_name}\n**Code:** `{code}`\n**Group:** {group_name}\n\n{desc}\n\n**Estimated Stop Times:**\n```{df1_str}```'
             color = 0x500000
 
             embed = discord.Embed(title=title, description=description, color=color)
