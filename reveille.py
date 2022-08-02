@@ -1471,14 +1471,20 @@ async def route(ctx, route_code, mode='SCALED'):
 
             busses = json.loads(json_str)
 
-            desc = '**Bus Status:** Nonoperating'
+            stop_descs = []
+            colors = []
+            types = []
+            passengers = []
+            capacities = []
+
+            bus_num = len(busses)
 
             for bus in busses:
                 bus_name = bus['Name']
                 bus_color = bus['Static']['Color']
                 bus_type = bus['Static']['Type']
-                driver = bus['Driver'] if bus['Driver'] is None else 'Unknown'
-                bus_datetime = arrow.get(bus['GPS']['Date'])
+                # driver = bus['Driver'] if bus['Driver'] is None else 'Unknown'
+                # bus_datetime = arrow.get(bus['GPS']['Date'])
                 direction = float(bus['GPS']['Dir'])
                 bus_lat = float(bus['GPS']['Lat'])
                 bus_lon = float(bus['GPS']['Long'])
@@ -1486,15 +1492,35 @@ async def route(ctx, route_code, mode='SCALED'):
                 passenger_total = bus['APC']['TotalPassenger']
                 next_stops = bus['NextStops']
 
+                colors.append(bus_color)
+                types.append(bus_type)
+                passengers.append(str(passenger_total))
+                capacities.append(str(passenger_cap))
+
                 # ax.text(bus_lon, bus_lat, ' ', fontsize=3, bbox=dict(boxstyle='circle', fc='black'))
                 ax.text(bus_lon, bus_lat, 'BUS', ha='center', va='center', fontsize=6, rotation=direction+180, bbox=dict(boxstyle='rarrow,pad=0.3', fc='white'))
                 plt.annotate(bus_name, xy=(bus_lon, bus_lat), xytext=(bus_lon-20, bus_lat), fontsize=4, horizontalalignment='right', verticalalignment='center')
 
+                stop_desc = ''
+
                 for next_stop in next_stops:
                     stop_name = next_stop['Name']
-                    stop_code = next_stop['StopCode']
+                    # stop_code = next_stop['StopCode']
 
-                desc = f'**Bus Status:** Operating\n**Color:** {bus_color}\n**Type:** {bus_type}\n**Passengers:** {passenger_total}\n**Capacity:** {passenger_cap}'
+                    stop_desc = f'**Next Stops:** {stop_name}' if stop_desc == '' else f'{stop_desc}, {stop_name}'
+
+                stop_descs.append(stop_desc)
+
+            stop_descs_parts = '\n'.join(stop_descs)
+            colors_parts = ', '.join(colors)
+            types_parts = ', '.join(types)
+            passengers_parts = ', '.join(passengers)
+            capacities_parts = ', '.join(capacities)
+
+            if bus_num == 0:
+                bus_desc = '**Bus Status:** Nonoperating'
+            else:
+                bus_desc = f'**Bus Status:** Operating\n**Busses:** {bus_num}\n**Color:** {colors_parts}\n**Type:** {types_parts}\n**Passengers:** {passengers_parts}\n**Capacity:** {capacities_parts}\n\n{stop_descs_parts}'
 
             if mode.upper() == 'SCALED':
                 pass
@@ -1563,7 +1589,7 @@ async def route(ctx, route_code, mode='SCALED'):
             df1_str = df1.to_string(index=False)
 
             title = '__Bus Route Information__'
-            description = f'**Name:** {route_name}\n**Code:** `{code}`\n**Group:** {group_name}\n\n{desc}\n\n**Estimated Stop Times:**\n```{df1_str}```'
+            description = f'**Name:** {route_name}\n**Code:** `{code}`\n**Group:** {group_name}\n\n{bus_desc}\n\n**Estimated Stop Times:**\n```{df1_str}```'
             color = 0x500000
 
             embed = discord.Embed(title=title, description=description, color=color)
