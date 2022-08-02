@@ -1471,7 +1471,7 @@ async def route(ctx, route_code, mode='SCALED'):
 
             busses = json.loads(json_str)
 
-            desc = ''
+            desc = '**Bus Status:** Nonoperating'
 
             for bus in busses:
                 bus_name = bus['Name']
@@ -1494,7 +1494,7 @@ async def route(ctx, route_code, mode='SCALED'):
                     stop_name = next_stop['Name']
                     stop_code = next_stop['StopCode']
 
-                desc = f'\n**Bus Color:** {bus_color}\n**Bus Type:** {type}\n**Passengers:** {passenger_total}\n**Capacity:** {passenger_cap}'
+                desc = f'**Bus Status:** Operating\n**Color:** {bus_color}\n**Type:** {type}\n**Passengers:** {passenger_total}\n**Capacity:** {passenger_cap}'
 
             if mode.upper() == 'SCALED':
                 pass
@@ -1517,7 +1517,7 @@ async def route(ctx, route_code, mode='SCALED'):
             # print(time_table)
 
             title = '__Bus Route Information__'
-            description = f'**Name:** {route_name}\n**Code:** {code}\n**Group:** {group_name}{desc}'
+            description = f'**Name:** {route_name}\n**Code:** `{code}`\n**Group:** {group_name}\n\n{desc}'
             color = 0x500000
 
             embed = discord.Embed(title=title, description=description, color=color)
