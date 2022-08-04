@@ -1019,8 +1019,6 @@ async def events(ctx, days='TODAY'):
 # Reports weather conditions given a specified step mode.
 @bot.command()
 async def weather(ctx, mode='HOURLY', val=1):
-    now = arrow.utcnow().to('US/Central')
-
     lat = round(30.618057377264176, 4)
     lon = round(-96.33628848619472, 4)
 
@@ -1450,21 +1448,21 @@ async def route(ctx, route_code, mode='SCALED'):
                     y = coords[i][1]
 
                     ax.text(x, y, '   ', fontsize=4, bbox=dict(boxstyle='square', fc='blue'))
-                    plt.annotate(point_name, xy=(x, y), xytext=(x-20, y), fontsize=8, horizontalalignment='right', verticalalignment='center')
+                    plt.annotate(point_name, xy=(x, y), xytext=(x-30, y), fontsize=8, horizontalalignment='right', verticalalignment='center')
 
-            for i in range(len(name_list)):
-                point_name = name_list[i]
-                point_rank = rank_list[i]
+            for j in range(len(name_list)):
+                point_name = name_list[j]
+                point_rank = rank_list[j]
 
                 if point_name != 'Way Point' and point_name not in unique_name_list and point_rank == -1:
                     unique_name_list.append(point_name)
 
                     coords = list(line.coords)
-                    x = coords[i][0]
-                    y = coords[i][1]
+                    x = coords[j][0]
+                    y = coords[j][1]
 
                     ax.text(x, y, ' ', fontsize=2, bbox=dict(boxstyle='circle', fc='blue'))
-                    plt.annotate(point_name, xy=(x, y), xytext=(x-20, y), fontsize=6, horizontalalignment='right', verticalalignment='center')
+                    plt.annotate(point_name, xy=(x, y), xytext=(x-30, y), fontsize=6, horizontalalignment='right', verticalalignment='center')
 
             bus_url = f'https://transport.tamu.edu/BusRoutesFeed/api/route/{code}/buses/mentor?request.preventCache={now.timestamp()}'
             json_str = requests.get(bus_url).content
@@ -1480,7 +1478,7 @@ async def route(ctx, route_code, mode='SCALED'):
             bus_num = len(busses)
 
             for bus in busses:
-                bus_name = bus['Name']
+                # bus_name = bus['Name']
                 bus_color = bus['Static']['Color']
                 bus_type = bus['Static']['Type']
                 # driver = bus['Driver'] if bus['Driver'] is None else 'Unknown'
@@ -1499,7 +1497,7 @@ async def route(ctx, route_code, mode='SCALED'):
 
                 # ax.text(bus_lon, bus_lat, ' ', fontsize=3, bbox=dict(boxstyle='circle', fc='black'))
                 ax.text(bus_lon, bus_lat, 'BUS', ha='center', va='center', fontsize=6, rotation=direction+180, bbox=dict(boxstyle='rarrow,pad=0.3', fc='white'))
-                plt.annotate(bus_name, xy=(bus_lon, bus_lat), xytext=(bus_lon-20, bus_lat), fontsize=4, horizontalalignment='right', verticalalignment='center')
+                # plt.annotate(bus_name, xy=(bus_lon, bus_lat), xytext=(bus_lon, bus_lat), fontsize=4, horizontalalignment='right', verticalalignment='center')
 
                 stop_desc = ''
 
