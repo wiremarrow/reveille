@@ -111,8 +111,8 @@ async def on_member_join(member):
 
 # Sends embed w/ list of commands (command syntax, arguments, + description)
 @bot.command()
-async def help(ctx):
-    title = '__Command Help Menu__'
+async def help(ctx, cmd=''):
+    title = f'__{cmd.upper()} Command Help__'
     description = (f'**Utility**\n'
                    f':raised_hand: `{PREFIX}help` - Produces a help menu for command descriptions and syntax.\n'
                    f':email: `{PREFIX}register [net_id]` - Register your NetID with the bot to verify yourself.\n'
@@ -148,6 +148,16 @@ async def help(ctx):
               'val1/val2 = Options for valid arguments; '
               '\'val\' = Literal argument.')
     color = 0x500000
+
+    if cmd == '':
+        title = '__Command Help Menu__'
+    elif cmd.upper() == 'HELP':
+        description = (f'**Format:**\n`{PREFIX}help`\n\nNo arguments.\n\n'
+                       f'**Description:**\nThis command will produce a help menu for command descriptions and syntax. It\'s pretty concise and useful for a quick reference when trying to format a correct command call. There\'s really nothing much else to it.')
+    elif cmd.upper() == 'REGISTER':
+        description = (f'**Format:**\n`{PREFIX}register [net_id]`\n\n`[net_id]` is a required argument: The NetID of the user.\n\n'
+                       f'**Examples:**\n`{PREFIX}register doe.jane`\n`{PREFIX}register alexbrown`\n\n'
+                       f'**Description:**\nThis command will initiate a registration process with Reveille Bot by sending an automated email to `net_id`@tamu.edu with a user-specific verification code. To be clear, `net_id` is literally your TAMU NetID that you use for school services. You can use the emailed verification code along with the `{PREFIX}verify` command as an argument in order to verify your identity with Reveille Bot to gain access to schedule and class management commands. Use `{PREFIX}help verify` to get more information.')
 
     embed = discord.Embed(title=title, description=description, color=color)
     embed.set_footer(text=footer)
