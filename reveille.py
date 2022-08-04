@@ -155,9 +155,13 @@ async def help(ctx, cmd=''):
         description = (f'**Format:**\n`{PREFIX}help`\n\nNo arguments.\n\n'
                        f'**Description:**\nThis command will produce a help menu for command descriptions and syntax. It\'s pretty concise and useful for a quick reference when trying to format a correct command call. There\'s really nothing much else to it.')
     elif cmd.upper() == 'REGISTER':
-        description = (f'**Format:**\n`{PREFIX}register [net_id]`\n\n`[net_id]` is a required argument: The NetID of the user.\n\n'
+        description = (f'**Format:**\n`{PREFIX}register [net_id]`\n\n`net_id` is a required argument: The NetID of the user.\n\n'
                        f'**Examples:**\n`{PREFIX}register doe.jane`\n`{PREFIX}register alexbrown`\n\n'
-                       f'**Description:**\nThis command will initiate a registration process with Reveille Bot by sending an automated email to `net_id`@tamu.edu with a user-specific verification code. To be clear, `net_id` is literally your TAMU NetID that you use for school services. You can use the emailed verification code along with the `{PREFIX}verify` command as an argument in order to verify your identity with Reveille Bot to gain access to schedule and class management commands. Use `{PREFIX}help verify` to get more information.')
+                       f'**Description:**\nThis command will initiate a registration process with Reveille Bot by sending an automated email to `net_id`@tamu.edu with a user-specific verification code. To be clear, `net_id` is literally your TAMU NetID that you use for school services. You can use the emailed verification code along with the `{PREFIX}verify` command as an argument in order to verify your identity with Reveille Bot to gain access to schedule and class management commands. Use `{PREFIX}help verify` to get more information about the `{PREFIX}verify` command.')
+    elif cmd.upper() == 'VERIFY':
+        description = (f'**Format:**\n`{PREFIX}verify [verif_code]`\n\n`verif_code` is a required argument: The emailed verification code sent to the user\'s TAMU school email (from the `{PREFIX}register` command).\n\n'
+                       f'**Examples:**\n`{PREFIX}verify 498382`\n`{PREFIX}verify 810255`\n\n'
+                       f'**Description:**\nThis command will initiate a verification process with Reveille Bot and check whether `verif_code` matches the actual verification code sent to `net_id`@tamu.edu (sent as a result of using the `{PREFIX}register` command). If `verif_code` successfully matches, your Discord user is marked as verified. Once you\'re verified you gain access to schedule and class management commands. Use `{PREFIX}help register` to get more information about the `{PREFIX}register` command.')
     else:
         description = 'WIP'
 
