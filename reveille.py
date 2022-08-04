@@ -158,6 +158,8 @@ async def help(ctx, cmd=''):
         description = (f'**Format:**\n`{PREFIX}register [net_id]`\n\n`[net_id]` is a required argument: The NetID of the user.\n\n'
                        f'**Examples:**\n`{PREFIX}register doe.jane`\n`{PREFIX}register alexbrown`\n\n'
                        f'**Description:**\nThis command will initiate a registration process with Reveille Bot by sending an automated email to `net_id`@tamu.edu with a user-specific verification code. To be clear, `net_id` is literally your TAMU NetID that you use for school services. You can use the emailed verification code along with the `{PREFIX}verify` command as an argument in order to verify your identity with Reveille Bot to gain access to schedule and class management commands. Use `{PREFIX}help verify` to get more information.')
+    else:
+        description = 'WIP'
 
     embed = discord.Embed(title=title, description=description, color=color)
     embed.set_footer(text=footer)
