@@ -162,6 +162,10 @@ async def help(ctx, cmd=''):
         description = (f'**Format:**\n`{PREFIX}verify [verif_code]`\n\n`verif_code` is a required argument: The emailed verification code sent to the user\'s TAMU school email (from the `{PREFIX}register` command).\n\n'
                        f'**Examples:**\n`{PREFIX}verify 498382`\n`{PREFIX}verify 810255`\n\n'
                        f'**Description:**\nThis command will initiate a verification process with Reveille Bot and check whether `verif_code` matches the actual verification code sent to `net_id`@tamu.edu (sent as a result of using the `{PREFIX}register` command). If `verif_code` successfully matches, your Discord user is marked as verified. Once you\'re verified you gain access to schedule and class management commands. Use `{PREFIX}help register` to get more information about the `{PREFIX}register` command.')
+    elif cmd.upper() == 'IS_VERIFIED':
+        description = description = (f'**Format:**\n`{PREFIX}is_verified [@user]`\n\n`@user` is a required argument: A mention of a user in the Discord server.\n\n'
+                       f'**Examples:**\n`{PREFIX}is_verified @ProudAggieMother79`\n`{PREFIX}is_verified @xXxTacticalGhostxXx`\n\n'
+                       f'**Description:**\nThis command will check whether the specified user is verified or not and return the answer in the form of a message.')
     else:
         description = 'WIP'
 
