@@ -166,6 +166,10 @@ async def help(ctx, cmd=''):
         description = description = (f'**Format:**\n`{PREFIX}is_verified [@user]`\n\n`@user` is a required argument: A mention of a user in the Discord server.\n\n'
                        f'**Examples:**\n`{PREFIX}is_verified @ProudAggieMother79`\n`{PREFIX}is_verified @xXxTacticalGhostxXx`\n\n'
                        f'**Description:**\nThis command will check whether the specified user is verified or not and return the answer in the form of a message.')
+    elif cmd.upper() == 'RESOURCES':
+        description = (f'**Format:**\n`{PREFIX}resources`\n\nNo arguments.\n\n'
+                       f'**Examples:**\n`{PREFIX}resources`\n\n'
+                       f'**Description:**\nThis command will display descriptions and hyperlinks of and to TAMU school resources such as: the Texas A&M website, Howdy web portal, the TAMU library website, TAMU IT Help Desk, Gmail, the Student Health Services website, the interactive campus map, Canvas, and the Aggie Print webpage.')
     else:
         description = 'WIP'
 
