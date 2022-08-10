@@ -1,3 +1,4 @@
+from tkinter import W
 import discord
 from discord.ext import commands
 import os
@@ -170,6 +171,66 @@ async def help(ctx, cmd=''):
         description = (f'**Format:**\n`{PREFIX}resources`\n\nNo arguments.\n\n'
                        f'**Examples:**\n`{PREFIX}resources`\n\n'
                        f'**Description:**\nThis command will display descriptions and hyperlinks of and to TAMU school resources such as: the Texas A&M website, Howdy web portal, the TAMU library website, TAMU IT Help Desk, Gmail, the Student Health Services website, the interactive campus map, Canvas, and the Aggie Print webpage.')
+    elif cmd.upper() == 'CALENDAR':
+        description = (f'**Format:**\n`{PREFIX}calendar (event_num)`\n\n`event_num` is an optional argument: The number of events to be retrieved. The default value for `event_num` is set to 3.\n\n'
+                       f'**Examples:**\n`{PREFIX}calendar`\n{PREFIX}calendar 6\n\n'
+                       f'**Description:**\nThis command will list the next `event_num` academic events from the TAMU Academic Calendar from now.')
+    elif cmd.upper() == 'EVENTS':
+        description = (f'**Format:**\n`{PREFIX}events (\'today\'/\'tomorrow\')`\n\n`mode` is an optional argument: The target day to list school events from.\n\n'
+                       f'**Examples:**\n`{PREFIX}events`\n{PREFIX}events tomorrow\n\n'
+                       f'**Description:**\nThis command will list the student events for a specified day.')
+    elif cmd.upper() == 'SEARCH':
+        description = (f'**Format:**\n`{PREFIX}search [search_num] [*terms]`\n\n`search_num` is a required argument: The maximum amount of search reults to display.\n`*terms` is a required argument: The specified search terms to query the TAMU directory with.\n\n'
+                       f'**Examples:**\n`{PREFIX}search 3 john doe`\n{PREFIX}search 10 thomas\n\n'
+                       f'**Description:**\nThis command will show `search_num` results from the TAMU directory for an arbitrary amount of search terms.')
+    elif cmd.upper() == 'COURSE':
+        description = (f'**Format:**\n`{PREFIX}course [subject_code] [course_num]`\n\n`subject_code` is a required argument: The TAMU department subject code for a specified course.\n`course_num` is a required argument: The TAMU course number for a specified course.\n\n'
+                       f'**Examples:**\n`{PREFIX}course MATH 151`\n{PREFIX}course CHEM 107\n\n'
+                       f'**Description:**\nThis command will return the credit information, a description, and important attributes of a specified course.')
+    elif cmd.upper() == 'RANK':
+        description = (f'**Format:**\n`{PREFIX}rank [subject_code] [course_num] (year_min)`\n\n`subject_code` is a required argument: The TAMU department subject code for a specified course.\n`course_num` is a required argument: The TAMU course number for a specified course.\n`year_min` is an optional argument: The minimum year a professor must have taught to be considered in the ranking pool. The default value set for `year_min` is set to 2021.\n\n'
+                       f'**Examples:**\n`{PREFIX}rank MATH 151`\n{PREFIX}rank CHEM 107 2016\n\n'
+                       f'**Description:**\nThis command will list professors along with their basic information for a specified course in descending order of mean GPA.')
+    elif cmd.upper() == 'PROF':
+        description = (f'**Format:**\n`{PREFIX}prof [first] [last] [subject_code] [course_num] (year_min)`\n\n`first` is a required argument: The first name of the specified professor.\n`last` is a required argument: The last name of the specified professor.\n`subject_code` is a required argument: The TAMU department subject code for a specified course.\n`course_num` is a required argument: The TAMU course number for a specified course.\n`year_min` is an optional argument: The minimum year recorded data for a specified professor is considered for assessment. The default value set for `year_min` is set to 0.\n\n'
+                       f'**Examples:**\n`{PREFIX}prof ALLEN AUSTIN MATH 151`\n{PREFIX}prof JANE DOE CHEM 107 2016\n\n'
+                       f'**Description:**\nThis command will provide detailed data on a specified professor\'s grading history for a desired course.')
+    elif cmd.upper() == 'SCHEDULE':
+        description = (f'**Format:**\n`{PREFIX}schedule`\n\nNo arguments.\n\n'
+                       f'**Examples:**\n`{PREFIX}schedule\n\n'
+                       f'**Description:**\nThis command will enumerate the classes in your schedule with credit information.')
+    elif cmd.upper() == 'ADD_CLASS':
+        description = (f'**Format:**\n`{PREFIX}add_class [subject_code] [course_num] [section_num]`\n\n`subject_code` is a required argument: The TAMU department subject code for a specified course.\n`course_num` is a required argument: The TAMU course number for a specified course.\n `section_num` is a required argument: The section number of a specified course designating a particular class.\n\n'
+                       f'**Examples:**\n`{PREFIX}add_class MATH 151 506`\n{PREFIX}add_class CHEM 107 201\n\n'
+                       f'**Description:**\nThis command will add a specified class to your schedule.')
+    elif cmd.upper() == 'REMOVE_CLASS':
+        description = (f'**Format:**\n`{PREFIX}remove_class [subject_code] [course_num] [section_num]`\n\n`subject_code` is a required argument: The TAMU department subject code for a specified course.\n`course_num` is a required argument: The TAMU course number for a specified course.\n `section_num` is a required argument: The section number of a specified course designating a particular class.\n\n'
+                       f'**Examples:**\n`{PREFIX}remove_class MATH 151 506`\n{PREFIX}remove_class CHEM 107 201\n\n'
+                       f'**Description:**\nThis command will remove a specified class from your schedule.')
+    elif cmd.upper() == 'STUDENTS':
+        description = (f'**Format:**\n`{PREFIX}students [subject_code] [course_num]`\n\n`subject_code` is a required argument: The TAMU department subject code for a specified course.\n`course_num` is a required argument: The TAMU course number for a specified course.\n\n'
+                       f'**Examples:**\n`{PREFIX}students MATH 151`\n{PREFIX}students CHEM 107\n\n'
+                       f'**Description:**\nThis command will find all verified students with a specified course in their schedule.')
+    elif cmd.upper() == 'NOM':
+        description = (f'**Format:**\n`{PREFIX}nom (\'open\'/\'all\')`\n\n`mode` is an optional argument: The display mode for the kinds of dining places that are shown.\n\n'
+                       f'**Examples:**\n`{PREFIX}nom`\n{PREFIX}nom all\n\n'
+                       f'**Description:**\nThis command will generate a list of on-campus dining places filtered by mode with hours-of-operation and open status.\n')
+    elif cmd.upper() == 'DINING':
+        description = (f'**Format:**\n`{PREFIX}dining (\'hall\'/\'north\'/\'south\'/\'central\'/\'west\'/\'east\'/\'all\')`\n\n`mode` is an optional argument: The display mode for the kinds of dining places that are shown.\n\n'
+                       f'**Examples:**\n`{PREFIX}dining`\n{PREFIX}dining central\n\n'
+                       f'**Description:**\nThis command will enumerate the `place_id`s for dining locations in a specified area to be used with the `{PREFIX}menu` command.\n')
+    elif cmd.upper() == 'MENU':
+        description = (f'**Format:**\n`{PREFIX}menu [place_id] ((\'general\'/\'breakfast\')/\'lunch\'/\'dinner\') (\'simple\'/\'detailed\')\n\n`place_id` is a required argument: The identification number of a particular dining location to return menus for.\n`menu_type` is an optional argument: The type of menu returned for a specified dining location. The default value set for `menu_type` is set to \'GENERAL\'.\n`display_mode` \n\n'
+                       f'**Examples:**\n`{PREFIX}menu 1 breakfast`\n{PREFIX}menu 16 general\n\n'
+                       f'**Description:**\nThis command will list the dining menus for a specified dining location (using a `place_id`) for a particular specified menu type and presentation.\n')
+    elif cmd.upper() == 'GARAGE':
+        description = (f'**Format:**\n`{PREFIX}garage\n\nNo arguments.\n\n'
+                       f'**Examples:**\n`{PREFIX}garage`\n\n'
+                       f'**Description:**\nThis command will display the real-time available spaces for all parking garages.\n')
+    elif cmd.upper() == 'BUS':
+        description = (f'**Format:**\n`{PREFIX}bus\n\nNo arguments.\n\n'
+                       f'**Examples:**\n`{PREFIX}bus`\n\n'
+                       f'**Description:**\nThis command will list the `route_code`s for bus routes in a specified route group to be used with the `{PREFIX}route` command.\n')
     else:
         description = 'WIP'
 
