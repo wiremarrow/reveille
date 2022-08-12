@@ -173,7 +173,7 @@ async def help(ctx, cmd=''):
                        f'**Description:**\nThis command will display descriptions and hyperlinks of and to TAMU school resources such as: the Texas A&M website, Howdy web portal, the TAMU library website, TAMU IT Help Desk, Gmail, the Student Health Services website, the interactive campus map, Canvas, and the Aggie Print webpage.')
     elif cmd.upper() == 'CALENDAR':
         description = (f'**Format:**\n`{PREFIX}calendar (event_num)`\n\n`event_num` is an optional argument: The number of events to be retrieved. The default value for `event_num` is set to 3.\n\n'
-                       f'**Examples:**\n`{PREFIX}calendar`\n{PREFIX}calendar 6\n\n'
+                       f'**Examples:**\n`{PREFIX}calendar`\n`{PREFIX}calendar 6`\n\n'
                        f'**Description:**\nThis command will list the next `event_num` academic events from the TAMU Academic Calendar from now.')
     elif cmd.upper() == 'EVENTS':
         description = (f'**Format:**\n`{PREFIX}events (\'today\'/\'tomorrow\')`\n\n`mode` is an optional argument: The target day to list school events from.\n\n'
