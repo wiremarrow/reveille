@@ -164,7 +164,7 @@ async def help(ctx, cmd=''):
                        f'**Examples:**\n`{PREFIX}verify 498382`\n`{PREFIX}verify 810255`\n\n'
                        f'**Description:**\nThis command will initiate a verification process with Reveille Bot and check whether `verif_code` matches the actual verification code sent to `net_id`@tamu.edu (sent as a result of using the `{PREFIX}register` command). If `verif_code` successfully matches, your Discord user is marked as verified. Once you\'re verified you gain access to schedule and class management commands. Use `{PREFIX}help register` to get more information about the `{PREFIX}register` command.')
     elif cmd.upper() == 'IS_VERIFIED':
-        description = description = (f'**Format:**\n`{PREFIX}is_verified [@user]`\n\n`@user` is a required argument: A mention of a user in the Discord server.\n\n'
+        description = (f'**Format:**\n`{PREFIX}is_verified [@user]`\n\n`@user` is a required argument: A mention of a user in the Discord server.\n\n'
                        f'**Examples:**\n`{PREFIX}is_verified @ProudAggieMother79`\n`{PREFIX}is_verified @xXxTacticalGhostxXx`\n\n'
                        f'**Description:**\nThis command will check whether the specified user is verified or not and return the answer in the form of a message.')
     elif cmd.upper() == 'RESOURCES':
@@ -176,8 +176,8 @@ async def help(ctx, cmd=''):
                        f'**Examples:**\n`{PREFIX}calendar`\n`{PREFIX}calendar 6`\n\n'
                        f'**Description:**\nThis command will list the next `event_num` academic events from the TAMU Academic Calendar from now.')
     elif cmd.upper() == 'EVENTS':
-        description = (f'**Format:**\n`{PREFIX}events (\'today\'/\'tomorrow\')`\n\n`mode` is an optional argument: The target day to list school events from.\n\n'
-                       f'**Examples:**\n`{PREFIX}events`\n{PREFIX}events tomorrow\n\n'
+        description = (f'**Format:**\n`{PREFIX}events (\'today\'/\'tomorrow\')`\n\n`mode` is an optional argument: The target day to list school events from. The default value for `mode` is set to `today`.\n\n'
+                       f'**Examples:**\n`{PREFIX}events`\n`{PREFIX}events tomorrow`\n\n'
                        f'**Description:**\nThis command will list the student events for a specified day.')
     elif cmd.upper() == 'SEARCH':
         description = (f'**Format:**\n`{PREFIX}search [search_num] [*terms]`\n\n`search_num` is a required argument: The maximum amount of search reults to display.\n`*terms` is a required argument: The specified search terms to query the TAMU directory with.\n\n'
