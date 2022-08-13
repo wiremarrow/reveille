@@ -180,8 +180,8 @@ async def help(ctx, cmd=''):
                        f'**Examples:**\n`{PREFIX}events`\n`{PREFIX}events tomorrow`\n\n'
                        f'**Description:**\nThis command will list the student events for a specified day.')
     elif cmd.upper() == 'SEARCH':
-        description = (f'**Format:**\n`{PREFIX}search [search_num] [*terms]`\n\n`search_num` is a required argument: The maximum amount of search reults to display.\n`*terms` is a required argument: The specified search terms to query the TAMU directory with.\n\n'
-                       f'**Examples:**\n`{PREFIX}search 3 john doe`\n{PREFIX}search 10 thomas\n\n'
+        description = (f'**Format:**\n`{PREFIX}search [search_num] [*terms]`\n\n`search_num` is a required argument: The maximum amount of search results to display.\n`*terms` is a required argument: The specified search terms to query the TAMU directory with.\n\n'
+                       f'**Examples:**\n`{PREFIX}search 3 john doe`\n`{PREFIX}search 10 thomas`\n\n'
                        f'**Description:**\nThis command will show `search_num` results from the TAMU directory for an arbitrary amount of search terms.')
     elif cmd.upper() == 'COURSE':
         description = (f'**Format:**\n`{PREFIX}course [subject_code] [course_num]`\n\n`subject_code` is a required argument: The TAMU department subject code for a specified course.\n`course_num` is a required argument: The TAMU course number for a specified course.\n\n'
