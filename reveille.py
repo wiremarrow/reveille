@@ -842,8 +842,7 @@ async def nom(ctx, mode='open'):
 
     if mode == 'open':
         if not vendors:
-            await ctx.send('Nothing is open!')
-            await ctx.send(':sob:')
+            await ctx.send('Nothing is open!\n:sob:')
             return
 
         description = '\n'.join(vendors)
